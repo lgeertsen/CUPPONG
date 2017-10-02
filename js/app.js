@@ -28,7 +28,7 @@ var Team = function(id, name, p1, p2) {
 }
 Team.list = [];
 
-for (var i = 0; i < 20; i++) {
+for (var i = 0; i < 1000; i++) {
   var name = "TEAM" + (i+1);
   new Team(i, name, "lol", "lol");
 }
@@ -37,6 +37,7 @@ for (var i = 0; i < 20; i++) {
 var Table = function(id) {
   this.id = id;
   this.free = true;
+  this.inUse = true;
 
   return this;
 }
@@ -139,7 +140,6 @@ var GameMaking = function() {
     var roundLength = this.gameTree[this.totalRounds - team.round].length;
     while(!assigned) {
       game = this.gameTree[this.totalRounds - team.round][i];
-      console.log(game);
       if(game.team1 == undefined) {
         game.round = this.totalRounds - team.round;
         game.game = i;
@@ -158,24 +158,28 @@ var GameMaking = function() {
   }
 
   this.finishGame = function(button) {
-    console.log("ma bite");
     var chooseDiv = button.parentNode.parentNode;
     var winner = chooseDiv.querySelector("input:checked");
     winner.checked = false;
     if(winner) {
       var game = this.gameTree[button.getAttribute("round")][button.getAttribute("game")];
       if(winner.value == 1) {
-        // console.log("winner: " + game.team1.name);
-        //this.teamsList.push(game.team1);
+        console.log("winner: " + game.team1.name);
         game.team1.round++;
         this.assignTeamToGame(game.team1);
       } else {
-        // console.log("winner: " + game.team2.name);
-        //this.teamsList.push(game.team2);
+        console.log("winner: " + game.team2.name);
         game.team2.round++;
         this.assignTeamToGame(game.team2);
       }
-      this.startGame(game.table);
+      var tableId = "table" + game.table.id;
+      var table = document.getElementById(tableId);
+      if(table.getAttribute("delete") == "true") {
+        this.tables[game.table.id-1].inUse = false;
+        table.parentNode.removeChild(table);
+      } else {
+        this.startGame(game.table);
+      }
     }
   }
 
@@ -221,6 +225,15 @@ var GameMaking = function() {
     cupTable.className = "col-sm-6 cupTable";
     var tableId = "table" + nb;
     cupTable.id = tableId;
+
+    var closeDiv = document.createElement("div");
+    closeDiv.className = "close";
+    var close = document.createElement("i");
+    close.className = "fa fa-times";
+    close.setAttribute("aria-hidden", "true");
+    close.onclick = function() {gameMaker.setDeleteTable(this)};
+    closeDiv.appendChild(close);
+    cupTable.appendChild(closeDiv);
 
     var tableTitleDiv = document.createElement("div");
     tableTitleDiv.className = "tableTitle";
@@ -338,6 +351,11 @@ var GameMaking = function() {
     var button = table.querySelector(".teamWinBtn");
     button.setAttribute("round", game.round);
     button.setAttribute("game", game.game);
+  }
+
+  this.setDeleteTable = function(e) {
+    var table = e.parentNode.parentNode;
+    table.setAttribute("delete", "true");
   }
 
   this.showWaitingList = function() {

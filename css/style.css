@@ -143,6 +143,7 @@ body {
 }
 
 .cupTable {
+  position: relative;
   margin: 5px 0;
  -ms-word-break: break-all;
      word-break: break-all;
@@ -151,6 +152,12 @@ body {
    -moz-hyphens: auto;
     -ms-hyphens: auto;
         hyphens: auto;
+}
+
+.cupTable .close {
+  position: absolute;
+  top: 25px;
+  right: 20px;
 }
 
 .cupTable .tableTitle {
