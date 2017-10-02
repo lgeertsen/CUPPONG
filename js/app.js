@@ -47,6 +47,7 @@ var Game = function() {
 }
 
 var GameMaking = function() {
+  this.teamsList = [];
   this.waitingList = [];
   this.nbTables;
   this.tables = [];
@@ -55,13 +56,14 @@ var GameMaking = function() {
   this.gameTree = [];
   //this.inGame = [];
   this.totalRounds = 0;
+
   this.round = 0;
   this.roundLength = 0;
   this.roundGame = 0;
 
   this.start = function() {
     this.shuffle();
-    this.teams = this.waitingList.length;
+    this.teams = this.teamsList.length;
     this.games = this.teams-1;
     this.makeTree();
     this.createTables();
@@ -74,18 +76,22 @@ var GameMaking = function() {
   }
 
   this.startGames = function() {
-    // for(var i in this.tables) {
-    //   this.startGame(this.tables[i]);
-    // }
+    this.assignTeamsToGame();
+    for(var i in this.tables) {
+      this.startGame(this.tables[i]);
+    }
   }
 
   this.startGame = function(table) {
+    var game = this.waitingList.shift();
+    game.table = table;
+    this.updateTable(game);
     // var game = this.gameTree[this.totalRounds-this.round][this.roundGame];
     // game.round = this.totalRounds-this.round;
     // game.game = this.roundGame;
     // game.table = table;
-    // game.team1 = this.waitingList.shift();
-    // game.team2 = this.waitingList.shift();
+    // game.team1 = this.teamsList.shift();
+    // game.team2 = this.teamsList.shift();
     // this.roundGame++;
     // if(this.roundGame == this.roundLength && this.round < this.totalRounds) {
     //   this.roundGame = 0;
@@ -93,6 +99,28 @@ var GameMaking = function() {
     //   this.roundLength = this.gameTree[this.totalRounds-this.round].length;
     // }
     // this.updateTable(game);
+  }
+
+  this.assignTeamsToGame = function() {
+    while(this.teamsList.length > 0) {
+      var game = this.gameTree[this.totalRounds - this.round][this.roundGame];
+      if(game.team1 = undefined) {
+        game.round = this.totalRounds - this.round;
+        game.game = this.roundGame;
+        game.team1 = teamsList.shift();
+      } else if (game.team2 = undefined) {
+        game.team2 = teamsList.shift();
+        game.complete = true;
+        this.waitingList.push(game);
+      } else {
+        this.roundGame++;
+        if(this.roundGame == this.roundLength && this.round < this.totalRounds) {
+          this.roundGame = 0;
+          this.round++;
+          this.roundLength = this.gameTree[this.totalRounds-this.round].length;
+        }
+      }
+    }
   }
 
   this.finishGame = function(button) {
@@ -103,15 +131,15 @@ var GameMaking = function() {
       var game = this.gameTree[button.getAttribute("round")][button.getAttribute("game")];
       if(winner.value == 1) {
         console.log("winner: " + game.team1.name);
-        this.waitingList.push(game.team1);
+        this.teamsList.push(game.team1);
       } else {
         console.log("winner: " + game.team2.name);
-        this.waitingList.push(game.team2);
+        this.teamsList.push(game.team2);
       }
-      var l = this.waitingList.length
+      var l = this.teamsList.length
       if(l % 2 == 0) {
-        var t1 = this.waitingList[l-2];
-        var t2 = this.waitingList[l-1];
+        var t1 = this.teamsList[l-2];
+        var t2 = this.teamsList[l-1];
         this.addToWaitngList(t1, t2);
       }
       if(l >= 2) {
@@ -121,13 +149,13 @@ var GameMaking = function() {
   }
 
   this.shuffle = function() {
-    this.waitingList = Team.list;
-    var l = this.waitingList.length;
+    this.teamsList = Team.list;
+    var l = this.teamsList.length;
     for(var i = 0; i < l; i++) {
       var index = random(0, l);
-      var t = this.waitingList[i];
-      this.waitingList[i] = this.waitingList[index];
-      this.waitingList[index] = t;
+      var t = this.teamsList[i];
+      this.teamsList[i] = this.teamsList[index];
+      this.teamsList[index] = t;
     }
   }
 
@@ -283,14 +311,14 @@ var GameMaking = function() {
 
   this.showWaitingList = function() {
     var length;
-    if(this.waitingList.length % 2 == 0) {
-      length = this.waitingList.length;
+    if(this.teamsList.length % 2 == 0) {
+      length = this.teamsList.length;
     } else {
-      length = this.waitingList.length-1;
+      length = this.teamsList.length-1;
     }
     for(var i = 0; i < length; i+=2) {
-      var t1 = this.waitingList[i];
-      var t2 = this.waitingList[i+1];
+      var t1 = this.teamsList[i];
+      var t2 = this.teamsList[i+1];
       this.addToWaitngList(t1, t2);
     }
   }
