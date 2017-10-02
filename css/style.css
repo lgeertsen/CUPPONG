@@ -1,0 +1,302 @@
+@font-face {
+    font-family: Dosis;
+    src: url('../fonts/Dosis/Dosis-Regular.ttf');
+}
+/** {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}*/
+
+body {
+  font-family: 'Dosis', sans-serif;
+  overflow: hidden;
+  /*overflow-y: scroll;*/
+}
+
+/*body * {
+  width: auto;
+  height: auto;
+}*/
+
+/*body {
+  overflow: hidden;
+}*/
+
+#teamInput {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  padding-bottom: 20px;
+}
+
+#sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  /*background-color: rgba(238, 101, 136, 0.9);*/
+  background-image: linear-gradient(90deg, rgba(238, 101, 136, 0.9), rgba(246, 149, 96, 0.9)), url('../img/beer.jpg');
+  background-position: center;
+  background-size: cover;
+  text-align: center;
+}
+
+#sidebar #startBtn {
+  position: absolute;
+  width: 80%;
+  bottom: 10px;
+  left: 0;
+  margin-left: 10%;
+  background-color: transparent;
+  box-shadow: inset 0 0 0 2px #ffffff;
+  color: #fff !important;
+  font-size: 3em;
+  -webkit-transition: background-color 1s; /* Safari */
+  transition: background-color 1s;
+}
+
+#sidebar #startBtn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+#teamTable {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  width: 100%;
+  -ms-word-break: break-all;
+      word-break: break-all;
+      word-break: break-word;
+ -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+     -ms-hyphens: auto;
+         hyphens: auto;  table-layout: fixed;
+  margin-top: 120px;
+}
+#teamTable thead {
+  /* head takes the height it requires,
+  and it's not scaled when table is resized */
+  flex: 0 0 auto;
+  width: calc(100% - 1.2em);
+}
+#teamTable tbody {
+  /* body takes all the remaining available space */
+  flex: 1 1 auto;
+  display: block;
+  overflow-y: scroll;
+}
+#teamTable tbody tr {
+  width: 100%;
+}
+#teamTable thead, #teamTable tbody tr {
+  display: table;
+}
+#teamTable input,
+#teamTable .btn {
+  width: 100%;
+}
+#teamTable .btn {
+  width: 100%;
+  background-color: transparent;
+  border: 2px solid rgb(238, 101, 136);
+  color: rgb(238, 101, 136) !important;
+  -webkit-transition: background-color 300ms; /* Safari */
+  transition: background-color 300ms;
+}
+#teamTable .btn:hover {
+  background-color: rgb(238, 101, 136);
+  color: #fff !important;
+}
+#teamTable .idField {
+  width: 8%;
+  font-size: 20px;
+  font-weight: bold;
+}
+#teamTable .tableText,
+#teamTable th,
+#teamTable th.tableText {
+  width: 24%;
+  font-size: 16px;
+}
+#teamTable .btnColumn {
+  width: 10%;
+}
+#teamTable .idField,
+#teamTable .tableText {
+  padding-top: 15px;
+}
+
+/*#teamTable tbody {
+  overflow-y: scroll;
+}*/
+
+#overview #tablesListDiv {
+  padding: 0;
+}
+
+#tablesList {
+  overflow-y: scroll;
+}
+
+.cupTable {
+  margin: 5px 0;
+ -ms-word-break: break-all;
+     word-break: break-all;
+     word-break: break-word;
+-webkit-hyphens: auto;
+   -moz-hyphens: auto;
+    -ms-hyphens: auto;
+        hyphens: auto;
+}
+
+.cupTable .tableTitle {
+  width: 30%;
+  margin: auto;
+  text-align: center;
+  border: 1px solid #d5d5d5;
+  border-bottom: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.cupTable .tableTitle h3 {
+  margin: 0;
+  padding: 0;
+}
+
+.cupTable .tableTeams {
+  border: 1px solid #d5d5d5;
+  border-radius: 5px;
+}
+
+.cupTable .team1,
+.cupTable .vs,
+.cupTable .team2 {
+  width: 39.5%;
+  vertical-align: middle;
+  display: inline-block;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.cupTable .tableTeams .vs {
+  width: 19.5%;
+}
+
+.cupTable .tableTeams .vs h1 {
+  font-size: 50px;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.cupTable label > input{ /* HIDE RADIO */
+  visibility: hidden;
+  position: absolute;
+}
+.cupTable label > input + .teamTrophy{ /* IMAGE STYLES */
+  cursor:pointer;
+}
+.cupTable label > input:checked + .teamTrophy{ /* (RADIO CHECKED) IMAGE STYLES */
+  background-image: linear-gradient(90deg, rgba(238, 101, 136, 0.9), rgba(246, 149, 96, 0.9));
+}
+
+.cupTable label > input:checked + .teamTrophy > .fa{ /* (RADIO CHECKED) IMAGE STYLES */
+  color: #fff;
+}
+
+.cupTable .teamTrophy {
+  padding: 15px 15px 10px 17px;
+  border: 1px solid #d5d5d5;
+  background-image: none;
+  border-radius: 50%;
+  text-align: center;
+  -webkit-transition: background-color 500ms; /* Safari */
+  transition: background-color 500ms;
+}
+
+.cupTable .teamTrophy:hover {
+  background-color: #eee;
+}
+
+.cupTable .teamTrophy .fa {
+  color: rgb(238, 101, 136);
+}
+
+.cupTable .teamWin {
+  text-align: center;
+}
+
+.cupTable .teamWinBtn {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  background-color: transparent;
+  border: 2px solid rgb(238, 101, 136);
+  color: rgb(238, 101, 136) !important;
+  -webkit-transition: background-color 300ms; /* Safari */
+  transition: background-color 300ms;
+}
+
+.cupTable .teamWinBtn:hover {
+  background-color: rgb(238, 101, 136);
+  color: #fff !important;
+}
+
+#waitingList {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #eee;
+}
+
+#waitingList #nextMatches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #d5d5d5;
+  overflow-y: scroll;
+}
+
+#waitingList .nextMatch {
+  padding: 10px 0;
+  border-bottom: 1px solid #d5d5d5;
+  -ms-word-break: break-all;
+      word-break: break-all;
+      word-break: break-word;
+ -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+     -ms-hyphens: auto;
+         hyphens: auto;
+}
+
+#waitingList #nextMatches .nextMatch .team1,
+#waitingList #nextMatches .nextMatch .vs,
+#waitingList #nextMatches .nextMatch .team2 {
+  vertical-align: middle;
+  display: inline-block;
+  width: 39.5%;
+  text-align: center;
+}
+
+#waitingList #nextMatches .nextMatch .vs {
+  width: 19%;
+}
+
+#waitingList #nextMatches .nextMatch .vs h3 {
+  margin: 0;
+}
+
+#splashScreen {
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  background-image: url(../img/cupPong.png);
+  background-repeat: no-repeat;
+  background-position: center;
+}
