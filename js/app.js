@@ -28,6 +28,12 @@ var Team = function(id, name, p1, p2) {
 }
 Team.list = [];
 
+for (var i = 0; i < 20; i++) {
+  var name = "TEAM" + (i+1);
+  new Team(i, name, "lol", "lol");
+}
+
+
 var Table = function(id) {
   this.id = id;
   this.free = true;
@@ -83,9 +89,11 @@ var GameMaking = function() {
   }
 
   this.startGame = function(table) {
-    var game = this.waitingList.shift();
-    game.table = table;
-    this.updateTable(game);
+    if(this.waitingList.length > 0) {
+      var game = this.waitingList.shift();
+      game.table = table;
+      this.updateTable(game);
+    }
     // var game = this.gameTree[this.totalRounds-this.round][this.roundGame];
     // game.round = this.totalRounds-this.round;
     // game.game = this.roundGame;
@@ -104,12 +112,14 @@ var GameMaking = function() {
   this.assignTeamsToGame = function() {
     while(this.teamsList.length > 0) {
       var game = this.gameTree[this.totalRounds - this.round][this.roundGame];
-      if(game.team1 = undefined) {
+      if(game.team1 == undefined) {
         game.round = this.totalRounds - this.round;
         game.game = this.roundGame;
-        game.team1 = teamsList.shift();
-      } else if (game.team2 = undefined) {
-        game.team2 = teamsList.shift();
+        game.team1 = this.teamsList.shift();
+        game.team1.round = this.round;
+      } else if (game.team2 == undefined) {
+        game.team2 = this.teamsList.shift();
+        game.team2.round = this.round;
         game.complete = true;
         this.waitingList.push(game);
       } else {
@@ -123,28 +133,49 @@ var GameMaking = function() {
     }
   }
 
+  this.assignTeamToGame = function(team) {
+    var assigned = false;
+    var i = 0;
+    var roundLength = this.gameTree[this.totalRounds - team.round].length;
+    while(!assigned) {
+      game = this.gameTree[this.totalRounds - team.round][i];
+      console.log(game);
+      if(game.team1 == undefined) {
+        game.round = this.totalRounds - team.round;
+        game.game = i;
+        game.team1 = team;
+        assigned = true;
+      } else if(game.team2 == undefined) {
+        game.team2 = team;
+        game.complete = true;
+        this.waitingList.push(game);
+        this.addToWaitingList(game.team1, game.team2);
+        assigned = true;
+      } else {
+        i++;
+      }
+    }
+  }
+
   this.finishGame = function(button) {
+    console.log("ma bite");
     var chooseDiv = button.parentNode.parentNode;
     var winner = chooseDiv.querySelector("input:checked");
     winner.checked = false;
     if(winner) {
       var game = this.gameTree[button.getAttribute("round")][button.getAttribute("game")];
       if(winner.value == 1) {
-        console.log("winner: " + game.team1.name);
-        this.teamsList.push(game.team1);
+        // console.log("winner: " + game.team1.name);
+        //this.teamsList.push(game.team1);
+        game.team1.round++;
+        this.assignTeamToGame(game.team1);
       } else {
-        console.log("winner: " + game.team2.name);
-        this.teamsList.push(game.team2);
+        // console.log("winner: " + game.team2.name);
+        //this.teamsList.push(game.team2);
+        game.team2.round++;
+        this.assignTeamToGame(game.team2);
       }
-      var l = this.teamsList.length
-      if(l % 2 == 0) {
-        var t1 = this.teamsList[l-2];
-        var t2 = this.teamsList[l-1];
-        this.addToWaitngList(t1, t2);
-      }
-      if(l >= 2) {
-        this.startGame(game.table);
-      }
+      this.startGame(game.table);
     }
   }
 
@@ -254,7 +285,7 @@ var GameMaking = function() {
     var winButton = document.createElement("button");
     winButton.className = "btn teamWinBtn";
     winButton.innerHTML = "Validate";
-    winButton.onclick = function() {game.finishGame(this)};
+    winButton.onclick = function() {gameMaker.finishGame(this)};
     vsButton.appendChild(winButton);
     tableChoose.appendChild(vsButton);
 
@@ -310,20 +341,14 @@ var GameMaking = function() {
   }
 
   this.showWaitingList = function() {
-    var length;
-    if(this.teamsList.length % 2 == 0) {
-      length = this.teamsList.length;
-    } else {
-      length = this.teamsList.length-1;
-    }
-    for(var i = 0; i < length; i+=2) {
-      var t1 = this.teamsList[i];
-      var t2 = this.teamsList[i+1];
-      this.addToWaitngList(t1, t2);
+    for(var i = 0; i < this.waitingList.length; i++) {
+      var t1 = this.waitingList[i].team1;
+      var t2 = this.waitingList[i].team2;
+      this.addToWaitingList(t1, t2);
     }
   }
 
-  this.addToWaitngList = function(team1, team2) {
+  this.addToWaitingList = function(team1, team2) {
     var nextMatch = document.createElement("li");
     nextMatch.className = "nextMatch";
 
@@ -355,7 +380,7 @@ var GameMaking = function() {
     roundNb.innerHTML = this.round;
   }
 }
-let game = new GameMaking();
+let gameMaker = new GameMaking();
 
 addTeam = function() {
   var teamName = teamNameInput.value.trim();
@@ -507,8 +532,8 @@ resetId = function() {
 }
 
 startGame = function() {
-  game.nbTables = document.getElementById("nbTables").value;
-  game.start();
+  gameMaker.nbTables = document.getElementById("nbTables").value;
+  gameMaker.start();
 }
 
 random = function(min, max) {
