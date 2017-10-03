@@ -4,18 +4,52 @@
     <meta charset="UTF-8">
     <title>CUP PONG second gamemanager</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <link rel="stylesheet" href="css/style2.css">
   </head>
-  <body>
-    <div id="splashScreen">
-      <h3>second window</h3>
+  <body id="body">
+    <div id="splashScreen"></div>
+    <div id="overview" class="hidden">
+      <div class="container-fluid">
+        <div class="row">
+          <div id="tablesListDiv" class="col-sm-9">
+            <div id="tablesView" class="container-fluid">
+              <div id="tablesList" class="row">
+
+              </div>
+            </div>
+          </div>
+          <div id="waitingList" class="col-sm-3">
+            <h3>waitingList</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="newGame" class="hidden">
+      <div class="cupTableContainer">
+        <div class="cupTable hidden">
+          <div class="tableTitle">
+            <h3 class="hideText">Table 1</h3>
+          </div>
+          <div class="tableTeams">
+            <div class="team1">
+              <h4 class="team1name hideText">Team1</h4>
+            </div>
+            <div class="vs">
+              <h1 class="hideText">VS</h1>
+            </div>
+            <div class="team2">
+              <h4 class="team2name hideText">Team2</h4>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 
   <script src="js/jquery.js" type="text/javascript"></script>
-  <script src="js/bootstrap.min.js" type="text/javascript"></script>
-  <script src="js/screen.js" type="text/javascript">
-  </script>
+  <!-- <script src="js/bootstrap.min.js" type="text/javascript"></script> -->
+  <script src="js/screen.js" type="text/javascript"></script>
   <script>
     // You can also require other files to run in this process
     require('./renderer.js')

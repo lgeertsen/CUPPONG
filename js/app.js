@@ -1,3 +1,5 @@
+const { ipcRenderer } = require('electron');
+
 var body = document.getElementById("body");
 body.style.height = window.innerHeight + "px";
 var teamList = document.getElementById("teamList");
@@ -28,7 +30,7 @@ var Team = function(id, name, p1, p2) {
 }
 Team.list = [];
 
-for (var i = 0; i < 1000; i++) {
+for (var i = 0; i < 30; i++) {
   var name = "TEAM" + (i+1);
   new Team(i, name, "lol", "lol");
 }
@@ -69,6 +71,8 @@ var GameMaking = function() {
   this.roundGame = 0;
 
   this.start = function() {
+    var data = { nbTables: this.nbTables };
+    ipcRenderer.send('createTables', data);
     this.shuffle();
     this.teams = this.teamsList.length;
     this.games = this.teams-1;
@@ -84,9 +88,12 @@ var GameMaking = function() {
 
   this.startGames = function() {
     this.assignTeamsToGame();
+    var games = [];
     for(var i in this.tables) {
-      this.startGame(this.tables[i]);
+      var game = this.startGame(this.tables[i]);
+      games.push({ tableId: game.table.id, team1: game.team1.name, team2: game.team2.name });
     }
+    ipcRenderer.send('startGames', games);
   }
 
   this.startGame = function(table) {
@@ -95,6 +102,7 @@ var GameMaking = function() {
       game.table = table;
       this.updateTable(game);
     }
+    return game;
     // var game = this.gameTree[this.totalRounds-this.round][this.roundGame];
     // game.round = this.totalRounds-this.round;
     // game.game = this.roundGame;
@@ -160,8 +168,8 @@ var GameMaking = function() {
   this.finishGame = function(button) {
     var chooseDiv = button.parentNode.parentNode;
     var winner = chooseDiv.querySelector("input:checked");
-    winner.checked = false;
     if(winner) {
+      winner.checked = false;
       var game = this.gameTree[button.getAttribute("round")][button.getAttribute("game")];
       if(winner.value == 1) {
         console.log("winner: " + game.team1.name);

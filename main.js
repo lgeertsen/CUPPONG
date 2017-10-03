@@ -4,6 +4,8 @@ const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 
+const {ipcMain} = require('electron')
+
 const path = require('path')
 const url = require('url')
 
@@ -19,22 +21,25 @@ function createWindow () {
   })
 
   // if (externalDisplay) {
-  //   secondWindow = new BrowserWindow({
-  //     x: externalDisplay.bounds.x,
-  //     y: externalDisplay.bounds.y,
-  //     closable: false,
-  //     focusable: false,
-  //     fullscreen: true,
-  //     frame: false,
-  //     skipTaskbar: true,
-  //     icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
-  //   })
-  //   secondWindow.loadURL(url.format({
-  //     pathname: path.join(__dirname, 'second.html'),
-  //     protocol: 'file:',
-  //     slashes: true
-  //   }))
-  // }
+  if(true) {
+    secondWindow = new BrowserWindow({
+      // width: width,
+      // height: height,
+      x: externalDisplay.bounds.x,
+      y: externalDisplay.bounds.y,
+      closable: false,
+      // focusable: false,
+      fullscreen: true,
+      frame: false,
+      // skipTaskbar: true,
+      icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
+    })
+    secondWindow.loadURL(url.format({
+      pathname: path.join(__dirname, 'second.html'),
+      protocol: 'file:',
+      slashes: true
+    }))
+  }
 
   // Create the browser window.
   const width = electron.screen.getPrimaryDisplay().workAreaSize.width
@@ -47,7 +52,6 @@ function createWindow () {
     icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
   })
   mainWindow.maximize();
-
   mainWindow.setMenu(null);
   //secondWindow.setMenu(null);
 
@@ -60,6 +64,15 @@ function createWindow () {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
+  secondWindow.webContents.openDevTools()
+
+  ipcMain.on('createTables', (event, data) => {
+    secondWindow.webContents.send('createTables', data)
+  });
+
+  ipcMain.on('startGames', (event, data) => {
+    secondWindow.webContents.send('startGames', data)
+  });
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
