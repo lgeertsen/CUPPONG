@@ -189,7 +189,7 @@ var GameMaking = function() {
         var g = this.startGame(game.table);
         var data = {
           finishedGame: {
-            table: game.table.id,
+            tableId: game.table.id,
             team1: game.team1.name,
             team2: game.team2.name,
             winner: winner.value

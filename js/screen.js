@@ -9,8 +9,12 @@ var newGame = document.getElementById("newGame");
 var tablesList = document.getElementById("tablesList");
 var waitingList = document.getElementById("nextMatches");
 
+let busy = false;
+let waitingFunctionList = [];
+
 var Renderer = function() {
   this.startGames = function(games) {
+    busy = true;
     for(var i = 0; i < games.length; i++) {
       this.startGame(games[i], i*9500);
     }
@@ -21,6 +25,7 @@ var Renderer = function() {
       newGame.className = "animated fadeOut";
       setTimeout(function(){
         newGame.className = "hidden";
+        endBusy();
       }, 1000);
     }, 9500*games.length);
   }
@@ -74,11 +79,12 @@ var Renderer = function() {
     team2.className = "team2name";
     cupTable.className = "cupTable";
 
-    table.innerHTML = "Table " + game.table;
+    table.innerHTML = "Table " + game.tableId;
     team1.innerHTML = game.team1;
     team2.innerHTML = game.team2;
 
     newGame.className = "animated fadeIn";
+
     setTimeout(function() {
       if(game.winner == 1) {
         team1.className = "team1name animated pulse winner";
@@ -228,11 +234,53 @@ ipcRenderer.on('waitingList', (event, data) => {
 });
 
 ipcRenderer.on('finishGame', (event, data) => {
+  var finished = false;
+  if(busy) {
+    waitingFunctionList.push({
+      function: finishGameStartGame,
+      data: data
+    });
+  } else {
+    busy = true;
+    renderer.finishGame(data.finishedGame);
+    renderer.startGame(data.newGame, 8500);
+    var obj = waitingList.querySelector('.nextMatch:first-child');
+    obj.parentNode.removeChild(obj);
+    setTimeout(function() {
+      renderer.updateTable(data.newGame);
+      newGame.className = "animated fadeOut";
+      setTimeout(function(){
+        newGame.className = "hidden";
+        endBusy();
+      }, 1000);
+    }, 18000);
+  }
+});
+
+function finishGameStartGame(data) {
+  busy = true;
   renderer.finishGame(data.finishedGame);
   renderer.startGame(data.newGame, 8500);
   var obj = waitingList.querySelector('.nextMatch:first-child');
   obj.parentNode.removeChild(obj);
   setTimeout(function() {
-    newGame.className = "hidden";
+    renderer.updateTable(data.newGame);
+    newGame.className = "animated fadeOut";
+    setTimeout(function(){
+      newGame.className = "hidden";
+      endBusy();
+    }, 1000);
   }, 18000);
-});
+}
+
+function callFunction(callback, data) {
+  callback(data);
+}
+
+function endBusy() {
+  busy = false;
+  if(waitingFunctionList.length > 0) {
+    var f = waitingFunctionList.shift();
+    callFunction(f.function, f.data);
+  }
+}

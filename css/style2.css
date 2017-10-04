@@ -187,6 +187,12 @@ body {
   font-size: 56px;
 }
 
+#newGame .cupTable .team1anim,
+#newGame .cupTable .team2anim {
+  display: table;
+  margin: auto;
+}
+
 #newGame .cupTable .tableTeams .winner {
   background: -webkit-linear-gradient(90deg, rgba(84, 195, 225, 0.9), rgba(107, 195, 120, 0.9));
   -webkit-background-clip: text;
