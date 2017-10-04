@@ -14,24 +14,43 @@ let waitingFunctionList = [];
 
 var Renderer = function() {
   this.startGames = function(games) {
-    busy = true;
     for(var i = 0; i < games.length; i++) {
-      this.startGame(games[i], i*9500);
-    }
-    setTimeout(function() {
-      for(var i = 0; i < games.length; i++) {
-        renderer.updateTable(games[i]);
+      if(busy) {
+        waitingFunctionList.push({
+          function: startGame,
+          data: games[i]
+        });
+      } else {
+        renderer.startGame(games[i]);
       }
-      newGame.className = "animated fadeOut";
-      setTimeout(function(){
-        newGame.className = "hidden";
-        endBusy();
-      }, 1000);
-    }, 9500*games.length);
+    }
+    for(var i = 0; i < games.length; i++) {
+      renderer.updateTable(games[i]);
+    }
+
+    // busy = true;
+    // for(var i = 0; i < games.length; i++) {
+    //   this.startGame(games[i], i*9500);
+    // }
+    // setTimeout(function() {
+    //   for(var i = 0; i < games.length; i++) {
+    //     renderer.updateTable(games[i]);
+    //   }
+    //   if(waitingFunctionList.length == 0) {
+    //     newGame.className = "animated fadeOut";
+    //     setTimeout(function(){
+    //       newGame.className = "hidden";
+    //       endBusy();
+    //     }, 1000);
+    //   } else {
+    //     endBusy();
+    //   }
+    // }, 9500*games.length);
   }
 
-  this.startGame = function(game, time) {
-    setTimeout(function() {
+  this.startGame = function(game) {
+    // setTimeout(function() {
+      busy = true;
       var cupTable = newGame.querySelector(".cupTable");
       var table = newGame.querySelector(".tableTitle h3");
       var team1 = newGame.querySelector(".team1name");
@@ -58,16 +77,18 @@ var Renderer = function() {
                 cupTable.className = "cupTable animated fadeOut";
                 setTimeout(function() {
                   cupTable.className = "cupTable hidden";
+                  endBusy();
                 }, 1000);
               }, 2000);
             }, 1500);
           }, 1000);
         }, 1500);
       }, 2000);
-    }, time);
+    // }, time);
   }
 
   this.finishGame = function(game) {
+    busy = true;
     var cupTable = newGame.querySelector(".cupTable");
     var table = newGame.querySelector(".tableTitle h3");
     var team1 = newGame.querySelector(".team1name");
@@ -83,7 +104,7 @@ var Renderer = function() {
     team1.innerHTML = game.team1;
     team2.innerHTML = game.team2;
 
-    newGame.className = "animated fadeIn";
+    cupTable.className = "cupTable animated fadeIn";
 
     setTimeout(function() {
       if(game.winner == 1) {
@@ -109,11 +130,34 @@ var Renderer = function() {
             cupTable.className = "cupTable animated fadeOut";
             setTimeout(function() {
               cupTable.className = "cupTable hidden";
+              endBusy();
             }, 1000);
           }, 2000);
         }, 1500);
       }, 1500);
     }, 2000);
+  }
+
+  this.champions = function(data) {
+    var champions = document.getElementById("champions");
+    var newChamps = document.getElementById("newChamps");
+    var champsTeam = document.getElementById("championsTeam");
+    var champsNames = document.getElementById("championsPlayers");
+    var champsP1 = document.getElementById("championsP1");
+    var champsP2 = document.getElementById("championsP2");
+    champsTeam.innerHTML = data.team;
+    champsP1.innerHTML = data.player1;
+    champsP2.innerHTML = data.player2;
+    champions.className = "animated fadeIn";
+    setTimeout(function() {
+      newChamps.className = "animated zoomIn";
+      setTimeout(function() {
+        champsTeam.className = "animated flipInY";
+        setTimeout(function() {
+          champsNames.className = "animated slideInUp";
+        }, 1000);
+      }, 1000);
+    }, 1000);
   }
 
   this.createTable = function(id, total) {
@@ -234,43 +278,82 @@ ipcRenderer.on('waitingList', (event, data) => {
 });
 
 ipcRenderer.on('finishGame', (event, data) => {
-  var finished = false;
   if(busy) {
     waitingFunctionList.push({
-      function: finishGameStartGame,
+      function: finishGame,
+      data: data.finishedGame
+    });
+    waitingFunctionList.push({
+      function: startGame,
+      data: data.newGame
+    });
+  } else {
+    finishGame(data.finishedGame);
+    waitingFunctionList.push({
+      function: startGame,
+      data: data.newGame
+    });
+  }
+  var obj = waitingList.querySelector('.nextMatch:first-child');
+  setTimeout(function() {
+    if(obj) {
+      obj.parentNode.removeChild(obj);
+    }
+    renderer.updateTable(data.newGame);
+  });
+});
+
+ipcRenderer.on('finishDelete', (event, data) => {
+  if(busy) {
+    waitingFunctionList.push({
+      function: finishGame,
       data: data
     });
   } else {
-    busy = true;
-    renderer.finishGame(data.finishedGame);
-    renderer.startGame(data.newGame, 8500);
-    var obj = waitingList.querySelector('.nextMatch:first-child');
+    finishGame(data);
+  }
+  var tableId = "table" + data.tableId;
+  var obj = document.getElementById(tableId);
+  setTimeout(function() {
     obj.parentNode.removeChild(obj);
-    setTimeout(function() {
-      renderer.updateTable(data.newGame);
-      newGame.className = "animated fadeOut";
-      setTimeout(function(){
-        newGame.className = "hidden";
-        endBusy();
-      }, 1000);
-    }, 18000);
+  }, 1000)
+});
+
+ipcRenderer.on('champions', (event, data) => {
+  if(busy) {
+    waitingFunctionList.push({
+      function: finishGame,
+      data: data.finishedGame
+    });
+    waitingFunctionList.push({
+      function: champions,
+      data: data.champions
+    });
+  } else {
+    finishGame(data.finishedGame);
+    waitingFunctionList.push({
+      function: champions,
+      data: data.champions
+    });
   }
 });
 
-function finishGameStartGame(data) {
-  busy = true;
-  renderer.finishGame(data.finishedGame);
-  renderer.startGame(data.newGame, 8500);
-  var obj = waitingList.querySelector('.nextMatch:first-child');
-  obj.parentNode.removeChild(obj);
-  setTimeout(function() {
-    renderer.updateTable(data.newGame);
-    newGame.className = "animated fadeOut";
-    setTimeout(function(){
-      newGame.className = "hidden";
-      endBusy();
-    }, 1000);
-  }, 18000);
+function startGame(game) {
+  if(newGame.className == "hidden") {
+    newGame.className = "animated fadeIn";
+  }
+  renderer.startGame(game);
+}
+
+function finishGame(data) {
+  if(newGame.className == "hidden") {
+    newGame.className = "animated fadeIn";
+  }
+  renderer.finishGame(data);
+}
+
+function champions(data) {
+  renderer.champions(data);
 }
 
 function callFunction(callback, data) {
@@ -282,5 +365,10 @@ function endBusy() {
   if(waitingFunctionList.length > 0) {
     var f = waitingFunctionList.shift();
     callFunction(f.function, f.data);
+  } else {
+    newGame.className = "animated fadeOut";
+    setTimeout(function(){
+      newGame.className = "hidden";
+    }, 1000);
   }
 }

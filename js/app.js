@@ -29,8 +29,8 @@ var Team = function(id, name, p1, p2) {
   Team.list.push(this);
 }
 Team.list = [];
-
-for (var i = 0; i < 30; i++) {
+new Team(0, "βΔΞ", "Lee Geertsen", "Valerio Ripperino");
+for (var i = 1; i < 4; i++) {
   var name = "TEAM" + (i+1);
   new Team(i, name, "lol", "lol");
 }
@@ -83,7 +83,7 @@ var GameMaking = function() {
     main.className = "hidden";
     overview.className = "";
     this.startGames();
-    this.showWaitingList()
+    this.showWaitingList();
   }
 
   this.startGames = function() {
@@ -97,25 +97,12 @@ var GameMaking = function() {
   }
 
   this.startGame = function(table) {
-    if(this.waitingList.length > 0) {
+    // if(this.waitingList.length > 0) {
       var game = this.waitingList.shift();
       game.table = table;
       this.updateTable(game);
-    }
-    return game;
-    // var game = this.gameTree[this.totalRounds-this.round][this.roundGame];
-    // game.round = this.totalRounds-this.round;
-    // game.game = this.roundGame;
-    // game.table = table;
-    // game.team1 = this.teamsList.shift();
-    // game.team2 = this.teamsList.shift();
-    // this.roundGame++;
-    // if(this.roundGame == this.roundLength && this.round < this.totalRounds) {
-    //   this.roundGame = 0;
-    //   this.round++;
-    //   this.roundLength = this.gameTree[this.totalRounds-this.round].length;
     // }
-    // this.updateTable(game);
+    return game;
   }
 
   this.assignTeamsToGame = function() {
@@ -171,36 +158,80 @@ var GameMaking = function() {
     if(winner) {
       winner.checked = false;
       var game = this.gameTree[button.getAttribute("round")][button.getAttribute("game")];
-      if(winner.value == 1) {
-        console.log("winner: " + game.team1.name);
-        game.team1.round++;
-        this.assignTeamToGame(game.team1);
+      if (game.round == 0) {
+        var data = {};
+        var champs = document.getElementById("champions");
+        var champsTeam = document.getElementById("championsTeam");
+        var champsPlayers = document.getElementById("championsPlayers");
+        // var champsP1 = document.getElementById("championsPlayer1");
+        // var champsP2 = document.getElementById("championsPlayer2");
+        champs.className = "";
+        if (winner.value == 1) {
+          champsTeam.innerHTML = game.team1.name;
+          champsPlayers.innerHTML = game.team1.player1 + " & " + game.team1.player2;
+          // champsP1.innerHTML = game.team1.player1;
+          // champsP2.innerHTML = game.team1.player2;
+          data.champions = {
+            team: game.team1.name,
+            player1: game.team1.player1,
+            player2: game.team1.player2
+          };
+        } else {
+          champsTeam.innerHTML = game.team2.name;
+          champsPlayers.innerHTML = game.team2.player1 + " & " + game.team2.player2;
+          // champsP1.innerHTML = game.team2.player1;
+          // champsP2.innerHTML = game.team2.player2;
+          data.champions= {
+            team: game.team2.name,
+            player1: game.team2.player1,
+            player2: game.team2.player2
+          };
+        }
+        data.finishedGame = {
+          tableId: game.table.id,
+          team1: game.team1.name,
+          team2: game.team2.name,
+          winner: winner.value
+        };
+        ipcRenderer.send('champions', data);
       } else {
-        console.log("winner: " + game.team2.name);
-        game.team2.round++;
-        this.assignTeamToGame(game.team2);
-      }
-      var tableId = "table" + game.table.id;
-      var table = document.getElementById(tableId);
-      if(table.getAttribute("delete") == "true") {
-        this.tables[game.table.id-1].inUse = false;
-        table.parentNode.removeChild(table);
-      } else {
-        var g = this.startGame(game.table);
-        var data = {
-          finishedGame: {
+        if(winner.value == 1) {
+          game.team1.round++;
+          this.assignTeamToGame(game.team1);
+        } else {
+          game.team2.round++;
+          this.assignTeamToGame(game.team2);
+        }
+        var tableId = "table" + game.table.id;
+        var table = document.getElementById(tableId);
+        if(table.getAttribute("delete") == "true" || this.waitingList.length == 0) {
+          this.tables[game.table.id-1].inUse = false;
+          table.parentNode.removeChild(table);
+          var data = {
             tableId: game.table.id,
             team1: game.team1.name,
             team2: game.team2.name,
             winner: winner.value
-          },
-          newGame: {
-            tableId: g.table.id,
-            team1: g.team1.name,
-            team2: g.team2.name
           }
-        };
-        ipcRenderer.send('finishGame', data);
+          ipcRenderer.send('finishDelete', data);
+        } else {
+          var g = this.startGame(game.table);
+          this.removeFromWaitinglist();
+          var data = {
+            finishedGame: {
+              tableId: game.table.id,
+              team1: game.team1.name,
+              team2: game.team2.name,
+              winner: winner.value
+            },
+            newGame: {
+              tableId: g.table.id,
+              team1: g.team1.name,
+              team2: g.team2.name
+            }
+          };
+          ipcRenderer.send('finishGame', data);
+        }
       }
     }
   }
@@ -345,22 +376,6 @@ var GameMaking = function() {
 
     cupTable.appendChild(tableTeams);
     tablesList.appendChild(cupTable);
-
-    // var table = document.createElement("div");
-    // table.className = "col-sm-6 cupTable";
-    // table.id = "table" + nb;
-    // var name = document.createElement("h3");
-    // name.innerHTML = "Table" + nb;
-    // var t1 = document.createElement("h5");
-    // t1.className = "team1name";
-    // t1.innerHTML = "Team" + ((nb*2)-1);
-    // var t2 = document.createElement("h5");
-    // t2.className = "team2name";
-    // t2.innerHTML = "Team" + nb*2;
-    // table.appendChild(name);
-    // table.appendChild(t1);
-    // table.appendChild(t2);
-    // tablesList.appendChild(table);
   }
 
   this.updateTable = function(game) {
@@ -417,6 +432,11 @@ var GameMaking = function() {
     nextMatch.appendChild(team2div);
 
     nextMatches.appendChild(nextMatch);
+  }
+
+  this.removeFromWaitinglist = function() {
+    var obj = nextMatches.querySelector(".nextMatch:first-child");
+    obj.parentNode.removeChild(obj);
   }
 
   this.showRound = function() {

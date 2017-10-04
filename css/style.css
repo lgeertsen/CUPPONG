@@ -283,3 +283,40 @@ body {
 #waitingList #nextMatches .nextMatch .vs h3 {
   margin: 0;
 }
+
+#champions {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: table;
+  background-image: linear-gradient(90deg, rgba(238, 101, 136, 0.9), rgba(246, 149, 96, 0.9)), url('../img/beer2.jpg');
+  background-position: center;
+  background-size: cover;
+  text-align: center;
+  color: #fff;
+}
+
+#champions div {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#champions h2 {
+  font-size: 70px;
+}
+
+#champions #championsTeam {
+  font-size: 120px;
+}
+
+#champions #championsPlayers {
+  font-size: 50px;
+}
+
+/*#champions #championsPlayer1,
+#champions #championsPlayer2 {
+  width: 49.9%;
+  display: inline-block;
+}*/
