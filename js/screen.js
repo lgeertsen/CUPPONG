@@ -7,6 +7,7 @@ var overview = document.getElementById("overview");
 var newGame = document.getElementById("newGame");
 
 var tablesList = document.getElementById("tablesList");
+var waitingList = document.getElementById("nextMatches");
 
 var Renderer = function() {
   this.startGames = function(games) {
@@ -59,6 +60,37 @@ var Renderer = function() {
         }, 1500);
       }, 2000);
     }, time);
+  }
+
+  this.finishGame = function(game) {
+    var cupTable = newGame.querySelector(".cupTable");
+    var table = newGame.querySelector(".tableTitle h3");
+    var team1 = newGame.querySelector(".team1name");
+    var vs = newGame.querySelector(".vs h1");
+    var team2 = newGame.querySelector(".team2name");
+    table.className = ""
+    team1.className = "team1name";
+    vs.className = ""
+    team2.className = "team2name";
+    cupTable.className = "cupTable";
+
+    table.innerHTML = "Table " + game.table;
+    team1.innerHTML = game.team1;
+    team2.innerHTML = game.team2;
+
+    newGame.className = "animated fadeIn";
+    setTimeout(function() {
+      if(game.winner == 1) {
+        team1.className = "team1name animated pulse";
+        team2.className = "team2name animated hinge"
+      } else {
+        team1.className = "team1name animated hinge";
+        team2.className = "team2name animated pulse"
+      }
+      setTimeout(function() {
+
+      }, 1000);
+    }, 3000);
   }
 
   this.createTable = function(id, total) {
@@ -120,6 +152,40 @@ var Renderer = function() {
     team1.innerHTML = game.team1;
     team2.innerHTML = game.team2;
   }
+
+  this.createWaitinglist = function(games) {
+    for(var i = 0; i < games.length; i++) {
+      this.addToWaitingList(games[i]);
+    }
+  }
+
+  this.addToWaitingList = function(game) {
+    var nextMatch = document.createElement("li");
+    nextMatch.className = "nextMatch";
+
+    var team1div = document.createElement("div");
+    team1div.className = "team1";
+    var team1name = document.createElement("h5");
+    team1name.innerHTML = game.team1;
+    team1div.appendChild(team1name);
+    nextMatch.appendChild(team1div);
+
+    var vsDiv = document.createElement("div");
+    vsDiv.className = "vs";
+    var vs = document.createElement("h3");
+    vs.innerHTML = "VS";
+    vsDiv.appendChild(vs);
+    nextMatch.appendChild(vsDiv);
+
+    var team2div = document.createElement("div");
+    team2div.className = "team2";
+    var team2name = document.createElement("h5");
+    team2name.innerHTML = game.team2;
+    team2div.appendChild(team2name);
+    nextMatch.appendChild(team2div);
+
+    waitingList.appendChild(nextMatch);
+  }
 }
 var renderer = new Renderer();
 
@@ -138,4 +204,12 @@ ipcRenderer.on('createTables', (event, data) => {
 
 ipcRenderer.on('startGames', (event, data) => {
   renderer.startGames(data);
+});
+
+ipcRenderer.on('waitingList', (event, data) => {
+  renderer.createWaitinglist(data);
+});
+
+ipcRenderer.on('finishGame', (event, data) => {
+  renderer.finishGame(data);
 });

@@ -187,6 +187,13 @@ var GameMaking = function() {
         table.parentNode.removeChild(table);
       } else {
         this.startGame(game.table);
+        var data = {
+          table: game.table.id,
+          team1: game.team1.name,
+          team2: game.team2.name,
+          winner: winner.value
+        }
+        ipcRenderer.send('finishGame', data);
       }
     }
   }
@@ -367,11 +374,14 @@ var GameMaking = function() {
   }
 
   this.showWaitingList = function() {
+    var waitingList = [];
     for(var i = 0; i < this.waitingList.length; i++) {
       var t1 = this.waitingList[i].team1;
       var t2 = this.waitingList[i].team2;
       this.addToWaitingList(t1, t2);
+      waitingList.push({ team1: t1.name, team2: t2.name });
     }
+    ipcRenderer.send('waitingList', waitingList);
   }
 
   this.addToWaitingList = function(team1, team2) {

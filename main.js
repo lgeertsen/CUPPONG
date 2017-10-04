@@ -15,6 +15,9 @@ let mainWindow
 let secondWindow
 
 function createWindow () {
+  const width = electron.screen.getPrimaryDisplay().workAreaSize.width
+  const height = electron.screen.getPrimaryDisplay().workAreaSize.height
+
   let displays = electron.screen.getAllDisplays()
   let externalDisplay = displays.find((display) => {
     return display.bounds.x !== 0 || display.bounds.y !== 0
@@ -23,14 +26,14 @@ function createWindow () {
   // if (externalDisplay) {
   if(true) {
     secondWindow = new BrowserWindow({
-      // width: width,
-      // height: height,
-      x: externalDisplay.bounds.x,
-      y: externalDisplay.bounds.y,
+      width: width,
+      height: height,
+      // x: externalDisplay.bounds.x,
+      // y: externalDisplay.bounds.y,
       closable: false,
       // focusable: false,
-      fullscreen: true,
-      frame: false,
+      // fullscreen: true,
+      // frame: false,
       // skipTaskbar: true,
       icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
     })
@@ -42,8 +45,6 @@ function createWindow () {
   }
 
   // Create the browser window.
-  const width = electron.screen.getPrimaryDisplay().workAreaSize.width
-  const height = electron.screen.getPrimaryDisplay().workAreaSize.height
   mainWindow = new BrowserWindow({
     width: width,
     height: height,
@@ -68,11 +69,19 @@ function createWindow () {
 
   ipcMain.on('createTables', (event, data) => {
     secondWindow.webContents.send('createTables', data)
-  });
+  })
 
   ipcMain.on('startGames', (event, data) => {
     secondWindow.webContents.send('startGames', data)
-  });
+  })
+
+  ipcMain.on('waitingList', (event, data) => {
+    secondWindow.webContents.send('waitingList', data)
+  })
+
+  ipcMain.on('finishGame', (event, data) => {
+    secondWindow.webContents.send('finishGame', data)
+  })
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

@@ -104,9 +104,47 @@ body {
   position: fixed;
   top: 0;
   right: 0;
+  padding: 0;
   height: 100%;
   background-color: #fff;
   text-align: center;
+}
+
+#waitingList #nextMatches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #d5d5d5;
+  text-align: center;
+}
+
+#waitingList .nextMatch {
+  padding: 10px 0;
+  border-bottom: 1px solid #d5d5d5;
+  -ms-word-break: break-all;
+      word-break: break-all;
+      word-break: break-word;
+ -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+     -ms-hyphens: auto;
+         hyphens: auto;
+}
+
+#waitingList #nextMatches .nextMatch .team1,
+#waitingList #nextMatches .nextMatch .vs,
+#waitingList #nextMatches .nextMatch .team2 {
+  vertical-align: middle;
+  display: inline-block;
+  width: 39.5%;
+  text-align: center;
+}
+
+#waitingList #nextMatches .nextMatch .vs {
+  width: 19%;
+}
+
+#waitingList #nextMatches .nextMatch .vs h3 {
+  margin: 0;
 }
 
 #newGame {
