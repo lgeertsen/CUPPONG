@@ -186,13 +186,20 @@ var GameMaking = function() {
         this.tables[game.table.id-1].inUse = false;
         table.parentNode.removeChild(table);
       } else {
-        this.startGame(game.table);
+        var g = this.startGame(game.table);
         var data = {
-          table: game.table.id,
-          team1: game.team1.name,
-          team2: game.team2.name,
-          winner: winner.value
-        }
+          finishedGame: {
+            table: game.table.id,
+            team1: game.team1.name,
+            team2: game.team2.name,
+            winner: winner.value
+          },
+          newGame: {
+            tableId: g.table.id,
+            team1: g.team1.name,
+            team2: g.team2.name
+          }
+        };
         ipcRenderer.send('finishGame', data);
       }
     }

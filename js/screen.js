@@ -52,7 +52,7 @@ var Renderer = function() {
               setTimeout(function() {
                 cupTable.className = "cupTable animated fadeOut";
                 setTimeout(function() {
-                  cupTable.className = " cupTable hidden";
+                  cupTable.className = "cupTable hidden";
                 }, 1000);
               }, 2000);
             }, 1500);
@@ -81,16 +81,33 @@ var Renderer = function() {
     newGame.className = "animated fadeIn";
     setTimeout(function() {
       if(game.winner == 1) {
-        team1.className = "team1name animated pulse";
-        team2.className = "team2name animated hinge"
+        team1.className = "team1name animated pulse winner";
+        team2.className = "team2name animated pulse loser";
       } else {
-        team1.className = "team1name animated hinge";
-        team2.className = "team2name animated pulse"
+        team1.className = "team1name animated pulse loser";
+        team2.className = "team2name animated pulse winner";
       }
       setTimeout(function() {
-
-      }, 1000);
-    }, 3000);
+        if(game.winner == 1) {
+          team2.className = "team2name animated hinge loser";
+        } else {
+          team1.className = "team1name animated hinge loser";
+        }
+        setTimeout(function() {
+          if(game.winner == 1) {
+            team1.className = "team1name animated flip winner";
+          } else {
+            team2.className = "team2name animated flip winner";
+          }
+          setTimeout(function() {
+            cupTable.className = "cupTable animated fadeOut";
+            setTimeout(function() {
+              cupTable.className = "cupTable hidden";
+            }, 1000);
+          }, 2000);
+        }, 1500);
+      }, 1500);
+    }, 2000);
   }
 
   this.createTable = function(id, total) {
@@ -211,5 +228,11 @@ ipcRenderer.on('waitingList', (event, data) => {
 });
 
 ipcRenderer.on('finishGame', (event, data) => {
-  renderer.finishGame(data);
+  renderer.finishGame(data.finishedGame);
+  renderer.startGame(data.newGame, 8500);
+  var obj = waitingList.querySelector('.nextMatch:first-child');
+  obj.parentNode.removeChild(obj);
+  setTimeout(function() {
+    newGame.className = "hidden";
+  }, 18000);
 });
