@@ -836,6 +836,7 @@
   from {
     transform: perspective(400px) rotate3d(0, 1, 0, -360deg);
     animation-timing-function: ease-out;
+    font-size: 56px;
   }
 
   40% {
@@ -856,6 +857,7 @@
   to {
     transform: perspective(400px);
     animation-timing-function: ease-in;
+    font-size: 80px;
   }
 }
 

@@ -64,8 +64,8 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
-  secondWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
+  // secondWindow.webContents.openDevTools()
 
   ipcMain.on('createTables', (event, data) => {
     secondWindow.webContents.send('createTables', data)
