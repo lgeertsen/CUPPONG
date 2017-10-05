@@ -4,7 +4,12 @@
   "description": "gamemaking application",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "build --dir"
+  },
+  "build": {
+    "appId": "com.cuppong.game",
+    "productName": "Cup Pong"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -17,6 +22,7 @@
   "author": "lgeertsen",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "~1.6.2"
+    "electron": "~1.6.2",
+    "electron-builder": "^19.34.1"
   }
 }

@@ -26,15 +26,15 @@ function createWindow () {
   // if (externalDisplay) {
   if(true) {
     secondWindow = new BrowserWindow({
-      // width: width,
-      // height: height,
-      x: externalDisplay.bounds.x,
-      y: externalDisplay.bounds.y,
+      width: width,
+      height: height,
+      // x: externalDisplay.bounds.x,
+      // y: externalDisplay.bounds.y,
       closable: false,
-      focusable: false,
-      fullscreen: true,
-      frame: false,
-      skipTaskbar: true,
+      // focusable: false,
+      // fullscreen: true,
+      // frame: false,
+      // skipTaskbar: true,
       icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
     })
     secondWindow.loadURL(url.format({
@@ -64,7 +64,7 @@ function createWindow () {
   }))
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
   // secondWindow.webContents.openDevTools()
 
   ipcMain.on('createTables', (event, data) => {
