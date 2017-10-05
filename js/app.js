@@ -1,4 +1,6 @@
 const { ipcRenderer } = require('electron');
+const {dialog} = require('electron').remote;
+var fs = require('fs');
 
 var body = document.getElementById("body");
 body.style.height = window.innerHeight + "px";
@@ -457,78 +459,82 @@ addTeam = function() {
   var teamId = Team.list.length;
   new Team(teamId, teamName, player1Name, player2Name);
   if(teamName.length > 0 && player1Name.length > 0 && player2Name.length > 0) {
-    var tr = document.createElement("tr");
-
-    var id = document.createElement("td");
-    id.innerHTML = Team.list.length;
-    id.className = "idField";
-    tr.appendChild(id);
-
-    var team = document.createElement("td");
-    team.className = "tableText"
-    var teamSpan = document.createElement("span");
-    teamSpan.innerHTML = teamName;
-    teamSpan.className = "teamSpan";
-    var teamEdit = document.createElement("input");
-    teamEdit.value = teamName;
-    teamEdit.className = "teamEdit hidden";
-    team.appendChild(teamSpan);
-    team.appendChild(teamEdit);
-    tr.appendChild(team);
-
-    var p1 = document.createElement("td");
-    p1.className = "tableText"
-    var p1Span = document.createElement("span");
-    p1Span.innerHTML = player1Name;
-    p1Span.className = "p1Span";
-    var p1Edit = document.createElement("input");
-    p1Edit.value = player1Name;
-    p1Edit.className = "p1Edit hidden";
-    p1.appendChild(p1Span);
-    p1.appendChild(p1Edit);
-    tr.appendChild(p1);
-
-    var p2 = document.createElement("td");
-    p2.className = "tableText"
-    var p2Span = document.createElement("span");
-    p2Span.innerHTML = player2Name;
-    p2Span.className = "p2Span";
-    var p2Edit = document.createElement("input");
-    p2Edit.value = player2Name;
-    p2Edit.className = "p2Edit hidden";
-    p2.appendChild(p2Span);
-    p2.appendChild(p2Edit);
-    tr.appendChild(p2);
-
-    var editBtnTd = document.createElement("td");
-    editBtnTd.className = "btnColumn";
-    var editBtn = document.createElement("button");
-    editBtn.innerHTML = "Edit";
-    editBtn.className = "btn editBtn";
-    editBtn.id = "edit" + Team.list.length;
-    editBtn.onclick = function() {editTeam(this)};
-    editBtnTd.appendChild(editBtn);
-    tr.appendChild(editBtnTd);
-    var saveBtn = document.createElement("button");
-    saveBtn.innerHTML = "Save";
-    saveBtn.className = "btn saveBtn hidden";
-    saveBtn.id = "save" + Team.list.length;
-    saveBtn.onclick = function() {saveTeam(this)};
-    editBtnTd.appendChild(saveBtn);
-    tr.appendChild(editBtnTd);
-
-    var removeBtnTd = document.createElement("td");
-    removeBtnTd.className = "btnColumn";
-    var removeBtn = document.createElement("button");
-    removeBtn.innerHTML = "Remove";
-    removeBtn.className = "btn";
-    removeBtn.onclick = function() {removeTeam(this)};
-    removeBtnTd.appendChild(removeBtn);
-    tr.appendChild(removeBtnTd);
-
-    teamList.appendChild(tr);
-    tr.scrollIntoView();
+    addTeamToList(teamId, teamName, player1Name, player2Name);
   }
+}
+
+addTeamToList = function(teamid, teamName, player1Name, player2Name) {
+  var tr = document.createElement("tr");
+
+  var id = document.createElement("td");
+  id.innerHTML = Team.list.length;
+  id.className = "idField";
+  tr.appendChild(id);
+
+  var team = document.createElement("td");
+  team.className = "tableText"
+  var teamSpan = document.createElement("span");
+  teamSpan.innerHTML = teamName;
+  teamSpan.className = "teamSpan";
+  var teamEdit = document.createElement("input");
+  teamEdit.value = teamName;
+  teamEdit.className = "teamEdit hidden";
+  team.appendChild(teamSpan);
+  team.appendChild(teamEdit);
+  tr.appendChild(team);
+
+  var p1 = document.createElement("td");
+  p1.className = "tableText"
+  var p1Span = document.createElement("span");
+  p1Span.innerHTML = player1Name;
+  p1Span.className = "p1Span";
+  var p1Edit = document.createElement("input");
+  p1Edit.value = player1Name;
+  p1Edit.className = "p1Edit hidden";
+  p1.appendChild(p1Span);
+  p1.appendChild(p1Edit);
+  tr.appendChild(p1);
+
+  var p2 = document.createElement("td");
+  p2.className = "tableText"
+  var p2Span = document.createElement("span");
+  p2Span.innerHTML = player2Name;
+  p2Span.className = "p2Span";
+  var p2Edit = document.createElement("input");
+  p2Edit.value = player2Name;
+  p2Edit.className = "p2Edit hidden";
+  p2.appendChild(p2Span);
+  p2.appendChild(p2Edit);
+  tr.appendChild(p2);
+
+  var editBtnTd = document.createElement("td");
+  editBtnTd.className = "btnColumn";
+  var editBtn = document.createElement("button");
+  editBtn.innerHTML = "Edit";
+  editBtn.className = "btn editBtn";
+  editBtn.id = "edit" + Team.list.length;
+  editBtn.onclick = function() {editTeam(this)};
+  editBtnTd.appendChild(editBtn);
+  tr.appendChild(editBtnTd);
+  var saveBtn = document.createElement("button");
+  saveBtn.innerHTML = "Save";
+  saveBtn.className = "btn saveBtn hidden";
+  saveBtn.id = "save" + Team.list.length;
+  saveBtn.onclick = function() {saveTeam(this)};
+  editBtnTd.appendChild(saveBtn);
+  tr.appendChild(editBtnTd);
+
+  var removeBtnTd = document.createElement("td");
+  removeBtnTd.className = "btnColumn";
+  var removeBtn = document.createElement("button");
+  removeBtn.innerHTML = "Remove";
+  removeBtn.className = "btn";
+  removeBtn.onclick = function() {removeTeam(this)};
+  removeBtnTd.appendChild(removeBtn);
+  tr.appendChild(removeBtnTd);
+
+  teamList.appendChild(tr);
+  tr.scrollIntoView();
 }
 
 editTeam = function(btn) {
@@ -585,6 +591,53 @@ removeTeam = function(btn) {
   tr.parentNode.removeChild(tr);
   Team.list.splice(id-1, 1);
   resetId();
+}
+
+saveTeamsToFile = function() {
+  dialog.showSaveDialog({ defaultPath: '/teams.cupPong',
+    filters: [{ name: 'Cup Pong Teams', extensions: ['cupPong'] }]}, (fileName) => {
+      if (fileName === undefined){
+          console.log("You didn't save the file");
+          return;
+      }
+      var obj = { teams: Team.list };
+      let content = JSON.stringify(obj);
+      fs.writeFile(fileName, content, (err) => {
+          if(err){
+              alert("An error ocurred creating the file "+ err.message)
+          }
+          alert("The file has been succesfully saved");
+      });
+  });
+}
+
+loadTeamsFromFile = function() {
+  dialog.showOpenDialog({ filters: [
+     { name: 'Cup Pong Teams', extensions: ['cupPong'] }
+   ]}, (fileNames) => {
+    // fileNames is an array that contains all the selected
+    if(fileNames === undefined){
+        console.log("No file selected");
+        return;
+    }
+    var fileName = fileNames[0];
+    fs.readFile(fileName, 'utf-8', (err, data) => {
+        if(err){
+            alert("An error ocurred reading the file :" + err.message);
+            return;
+        }
+        console.log("The file content is : " + data);
+        var obj = JSON.parse(data);
+        console.log(obj);
+        Team.list = [];
+        teamList.innerHTML = "";
+        for(var i = 0; i < obj.teams.length; i++) {
+          var t = obj.teams[i];
+          new Team(t.id, t.name, t.player1, t.player2);
+          addTeamToList(t.id, t.name, t.player1, t.player2);
+        }
+    });
+});
 }
 
 resetId = function() {

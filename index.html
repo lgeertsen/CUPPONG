@@ -18,7 +18,6 @@
               <input type="text" id="player1Name" name="player1" value="" placeholder="player 1 name">
               <input type="text" id="player2Name" name="player2" value="" placeholder="player 2 name">
               <button id="addTeam" class="btn" type="button" name="button" onclick="addTeam()">Add team</button>
-              <button id="saveTeams" class="btn" type="button" name="button">Save</button>
             </div>
             <table id="teamTable" class="table table-striped">
               <thead>
@@ -33,6 +32,8 @@
             </table>
           </div>
           <div id="sidebar" class="col-sm-4">
+            <button id="saveTeams" class="btn" type="button" name="button" onclick="saveTeamsToFile()">Save</button>
+            <button id="loadTeams" class="btn" type="button" name="button" onclick="loadTeamsFromFile()">Load</button>
             <h3>Number of tables</h3>
             <input id="nbTables" type="number" name="nbTables" value="1">
             <button id="startBtn" class="btn" type="button" name="matchMakingBtn" onclick="startGame()">Matchmaking</button>
