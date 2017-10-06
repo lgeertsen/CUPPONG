@@ -314,8 +314,18 @@ ipcRenderer.on('finishDelete', (event, data) => {
   }
   var tableId = "table" + data.tableId;
   var obj = document.getElementById(tableId);
+  var parent = obj.parentNode;
   setTimeout(function() {
-    obj.parentNode.removeChild(obj);
+    parent.removeChild(obj);
+    var tables = parent.querySelectorAll(".cupTableContainer");
+    for(var i = 0; i < tables.length; i++) {
+      tables[i].style.height = (window.innerHeight * (0.9 / (tables.length/2))) + "px";
+    }
+    if(tables.length % 2 == 0) {
+      tables[tables.length-1].className = "col-sm-6 cupTableContainer";
+    } else {
+      tables[tables.length-1].className = "col-sm-6 col-sm-offset-3 cupTableContainer";
+    }
   }, 1000)
 });
 

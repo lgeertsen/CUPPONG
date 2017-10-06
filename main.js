@@ -5,6 +5,7 @@ const app = electron.app
 const BrowserWindow = electron.BrowserWindow
 
 const {ipcMain} = require('electron')
+const dialog = require('electron').dialog
 
 const path = require('path')
 const url = require('url')
@@ -23,27 +24,6 @@ function createWindow () {
     return display.bounds.x !== 0 || display.bounds.y !== 0
   })
 
-  // if (externalDisplay) {
-  if(true) {
-    secondWindow = new BrowserWindow({
-      width: width,
-      height: height,
-      // x: externalDisplay.bounds.x,
-      // y: externalDisplay.bounds.y,
-      closable: false,
-      // focusable: false,
-      // fullscreen: true,
-      // frame: false,
-      // skipTaskbar: true,
-      icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
-    })
-    secondWindow.loadURL(url.format({
-      pathname: path.join(__dirname, 'second.html'),
-      protocol: 'file:',
-      slashes: true
-    }))
-  }
-
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: width,
@@ -54,7 +34,6 @@ function createWindow () {
   })
   mainWindow.maximize();
   mainWindow.setMenu(null);
-  //secondWindow.setMenu(null);
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -63,10 +42,54 @@ function createWindow () {
     slashes: true
   }))
 
+  if (externalDisplay) {
+  // if(true) {
+    secondWindow = new BrowserWindow({
+      // width: width,
+      // height: height,
+      x: externalDisplay.bounds.x,
+      y: externalDisplay.bounds.y,
+      closable: false,
+      focusable: false,
+      fullscreen: true,
+      frame: false,
+      skipTaskbar: true,
+      icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
+    })
+  } else {
+    mainWindow.webContents.send('noExternalDisplay', {})
+    secondWindow = new BrowserWindow({
+      width: width,
+      height: height,
+      closable: false,
+      frame: false,
+      icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
+    })
+
+    const options = {
+      type: 'info',
+      title: 'Information',
+      message: "Pour un meilleur fonctionnement du logiciel, veuillez brancher un écran externe ou videoprojecteur, et relancer le logiciel"
+    }
+    setTimeout(function() {
+      mainWindow.focus();
+      dialog.showMessageBox(options)
+    }, 3000)
+  }
+
+  secondWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'second.html'),
+    protocol: 'file:',
+    slashes: true
+  }))
+
+  secondWindow.setMenu(null);
+
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
   // secondWindow.webContents.openDevTools()
 
+if (secondWindow != null) {
   ipcMain.on('createTables', (event, data) => {
     secondWindow.webContents.send('createTables', data)
   })
@@ -90,6 +113,7 @@ function createWindow () {
   ipcMain.on('champions', (event, data) => {
     secondWindow.webContents.send('champions', data)
   })
+}
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -100,6 +124,7 @@ function createWindow () {
     if (secondWindow != null) {
       secondWindow.close()
       secondWindow.destroy()
+      secondWindow = null;
     }
   })
 

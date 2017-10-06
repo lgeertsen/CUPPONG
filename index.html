@@ -5,6 +5,7 @@
     <title>CUP PONG gamemanager</title>
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
   </head>
   <body id="body">
@@ -13,11 +14,13 @@
         <div class="row">
           <div class="col-sm-8">
             <div id="teamInput">
-              <h1>Team list</h1>
-              <input type="text" id="teamName" name="teamName" value="" placeholder="team name">
-              <input type="text" id="player1Name" name="player1" value="" placeholder="player 1 name">
-              <input type="text" id="player2Name" name="player2" value="" placeholder="player 2 name">
-              <button id="addTeam" class="btn" type="button" name="button" onclick="addTeam()">Add team</button>
+                <!-- <h1>Team list</h1> -->
+              <div id="inputDiv">
+                <input type="text" id="teamName" class="form-control" name="teamName" value="" placeholder="Team name">
+                <input type="text" id="player1Name" class="form-control" name="player1" value="" placeholder="Player 1 name">
+                <input type="text" id="player2Name" class="form-control" name="player2" value="" placeholder="Player 2 name">
+                <button id="addTeam" class="btn btn-block" type="button" name="button" onclick="addTeam()">Add team</button>
+              </div>
             </div>
             <table id="teamTable" class="table table-striped">
               <thead>
@@ -32,11 +35,11 @@
             </table>
           </div>
           <div id="sidebar" class="col-sm-4">
-            <button id="saveTeams" class="btn" type="button" name="button" onclick="saveTeamsToFile()">Save</button>
-            <button id="loadTeams" class="btn" type="button" name="button" onclick="loadTeamsFromFile()">Load</button>
+            <button id="saveTeams" class="btn" type="button" name="button" onclick="saveTeamsToFile()">Save teams</button>
+            <button id="loadTeams" class="btn" type="button" name="button" onclick="loadTeamsFromFile()">Load teams</button>
             <h3>Number of tables</h3>
-            <input id="nbTables" type="number" name="nbTables" value="1">
-            <button id="startBtn" class="btn" type="button" name="matchMakingBtn" onclick="startGame()">Matchmaking</button>
+            <input id="nbTables" class="form-control" type="number" name="nbTables" value="1" min="1">
+            <button id="startBtn" class="btn" type="button" name="matchMakingBtn" onclick="startGame()">Start</button>
           </div>
         </div>
       </div>

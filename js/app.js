@@ -5,7 +5,7 @@ var fs = require('fs');
 var body = document.getElementById("body");
 body.style.height = window.innerHeight + "px";
 var teamList = document.getElementById("teamList");
-teamList.style.height = (window.innerHeight * 0.75) + "px";
+teamList.style.height = (window.innerHeight * 0.85) + "px";
 
 var main = document.getElementById("main");
 
@@ -15,7 +15,6 @@ tablesList.style.height = (window.innerHeight * 0.9) + "px";
 var roundNb = document.getElementById("roundNb");
 var nextMatches = document.getElementById("nextMatches");
 nextMatches.style.height = (window.innerHeight * 0.9) + "px";
-
 
 var teamNameInput = document.getElementById("teamName");
 var player1NameInput = document.getElementById("player1Name");
@@ -31,11 +30,15 @@ var Team = function(id, name, p1, p2) {
   Team.list.push(this);
 }
 Team.list = [];
-new Team(0, "βΔΞ", "Lee Geertsen", "Valerio Ripperino");
-for (var i = 1; i < 4; i++) {
-  var name = "TEAM" + (i+1);
-  new Team(i, name, "lol", "lol");
-}
+// new Team(0, "βΔΞ", "Lee Geertsen", "Valerio Ripperino");
+// for (var i = 1; i < 3; i++) {
+//   var name = "TEAMTEAMTEAMTEAM" + (i+1);
+//   new Team(i, name, "lol", "lol");
+// }
+// for (var i = 3; i < 6; i++) {
+//   var name = "TEAMTEAM TEAMTEAM" + (i+1);
+//   new Team(i, name, "lol", "lol");
+// }
 
 
 var Table = function(id) {
@@ -208,7 +211,8 @@ var GameMaking = function() {
         var table = document.getElementById(tableId);
         if(table.getAttribute("delete") == "true" || this.waitingList.length == 0) {
           this.tables[game.table.id-1].inUse = false;
-          table.parentNode.removeChild(table);
+          var parent = table.parentNode;
+          parent.removeChild(table);
           var data = {
             tableId: game.table.id,
             team1: game.team1.name,
@@ -281,14 +285,14 @@ var GameMaking = function() {
     var tableId = "table" + nb;
     cupTable.id = tableId;
 
-    var closeDiv = document.createElement("div");
-    closeDiv.className = "close";
-    var close = document.createElement("i");
-    close.className = "fa fa-times";
-    close.setAttribute("aria-hidden", "true");
-    close.onclick = function() {gameMaker.setDeleteTable(this)};
-    closeDiv.appendChild(close);
-    cupTable.appendChild(closeDiv);
+    // var closeDiv = document.createElement("div");
+    // closeDiv.className = "close";
+    // var close = document.createElement("i");
+    // close.className = "fa fa-times";
+    // close.setAttribute("aria-hidden", "true");
+    // close.onclick = function() {gameMaker.setDeleteTable(this)};
+    // closeDiv.appendChild(close);
+    // cupTable.appendChild(closeDiv);
 
     var tableTitleDiv = document.createElement("div");
     tableTitleDiv.className = "tableTitle";
@@ -478,7 +482,7 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name) {
   teamSpan.className = "teamSpan";
   var teamEdit = document.createElement("input");
   teamEdit.value = teamName;
-  teamEdit.className = "teamEdit hidden";
+  teamEdit.className = "teamEdit form-control hidden";
   team.appendChild(teamSpan);
   team.appendChild(teamEdit);
   tr.appendChild(team);
@@ -490,7 +494,7 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name) {
   p1Span.className = "p1Span";
   var p1Edit = document.createElement("input");
   p1Edit.value = player1Name;
-  p1Edit.className = "p1Edit hidden";
+  p1Edit.className = "p1Edit form-control hidden";
   p1.appendChild(p1Span);
   p1.appendChild(p1Edit);
   tr.appendChild(p1);
@@ -502,7 +506,7 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name) {
   p2Span.className = "p2Span";
   var p2Edit = document.createElement("input");
   p2Edit.value = player2Name;
-  p2Edit.className = "p2Edit hidden";
+  p2Edit.className = "p2Edit form-control hidden";
   p2.appendChild(p2Span);
   p2.appendChild(p2Edit);
   tr.appendChild(p2);
@@ -548,11 +552,11 @@ editTeam = function(btn) {
   var saveBtn = tr.querySelector(".saveBtn");
 
   teamSpan.className = "teamSpan hidden";
-  teamEdit.className = "teamEdit";
+  teamEdit.className = "teamEdit form-control";
   p1Span.className = "p1Span hidden";
-  p1Edit.className = "p1Edit";
+  p1Edit.className = "p1Edit form-control";
   p2Span.className = "p2Span hidden";
-  p2Edit.className = "p2Edit";
+  p2Edit.className = "p2Edit form-control";
   btn.className = "btn editBtn hidden";
   saveBtn.className = "btn saveBtn";
 }
@@ -576,11 +580,11 @@ saveTeam = function(btn) {
   p1Span.innerHTML = p1Edit.value;
   p2Span.innerHTML = p2Edit.value;
   teamSpan.className = "teamSpan";
-  teamEdit.className = "teamEdit hidden";
+  teamEdit.className = "teamEdit form-control hidden";
   p1Span.className = "p1Span";
-  p1Edit.className = "p1Edit hidden";
+  p1Edit.className = "p1Edit form-control hidden";
   p2Span.className = "p2Span";
-  p2Edit.className = "p2Edit hidden";
+  p2Edit.className = "p2Edit form-control hidden";
   btn.className = "btn saveBtn hidden";
   editBtn.className = "btn editBtn";
 }
@@ -597,7 +601,7 @@ saveTeamsToFile = function() {
   dialog.showSaveDialog({ defaultPath: '/teams.cupPong',
     filters: [{ name: 'Cup Pong Teams', extensions: ['cupPong'] }]}, (fileName) => {
       if (fileName === undefined){
-          console.log("You didn't save the file");
+          // console.log("You didn't save the file");
           return;
       }
       var obj = { teams: Team.list };
@@ -606,7 +610,7 @@ saveTeamsToFile = function() {
           if(err){
               alert("An error ocurred creating the file "+ err.message)
           }
-          alert("The file has been succesfully saved");
+          // alert("The file has been succesfully saved");
       });
   });
 }
@@ -617,7 +621,7 @@ loadTeamsFromFile = function() {
    ]}, (fileNames) => {
     // fileNames is an array that contains all the selected
     if(fileNames === undefined){
-        console.log("No file selected");
+        // console.log("No file selected");
         return;
     }
     var fileName = fileNames[0];
@@ -626,9 +630,9 @@ loadTeamsFromFile = function() {
             alert("An error ocurred reading the file :" + err.message);
             return;
         }
-        console.log("The file content is : " + data);
+        // console.log("The file content is : " + data);
         var obj = JSON.parse(data);
-        console.log(obj);
+        // console.log(obj);
         Team.list = [];
         teamList.innerHTML = "";
         for(var i = 0; i < obj.teams.length; i++) {
@@ -647,8 +651,35 @@ resetId = function() {
   }
 }
 
+var messageBox = document.createElement("div");
+messageBox.className = "messageBox hidden";
+
+sendMessage = function(message) {
+  var box = messageBox;
+  box.innerHTML = message;
+  body.appendChild(box);
+  box.className = "messageBox animated fadeIn";
+  setTimeout(function() {
+    box.className = "messageBox hidden animated fadeOut";
+    setTimeout(function() {
+      box.parentNode.removeChild(box);
+    }, 1000);
+  }, 4000);
+}
+
 startGame = function() {
-  gameMaker.nbTables = document.getElementById("nbTables").value;
+  if(Team.list.length < 2) {
+    sendMessage("Vous devez ajouter au moins 2 équipes");
+    return;
+  }
+  gameMaker.nbTables = document.getElementById("nbTables").value
+  if(gameMaker.nbTables > Team.list.length / 2) {
+    var nb = Team.list.length;
+    if(nb % 2 == 1) {
+      nb -= 1;
+    }
+    gameMaker.nbTables = nb/2;
+  }
   gameMaker.start();
 }
 
