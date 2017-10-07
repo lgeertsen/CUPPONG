@@ -270,6 +270,9 @@ ipcRenderer.on('createTables', (event, data) => {
 });
 
 ipcRenderer.on('startGames', (event, data) => {
+  // for(var i = 0; i < data.length; i++) {
+  //   console.log(data[i].round);
+  // }
   renderer.startGames(data);
 });
 
@@ -278,6 +281,7 @@ ipcRenderer.on('waitingList', (event, data) => {
 });
 
 ipcRenderer.on('finishGame', (event, data) => {
+  //console.log(data.newGame.round);
   if(busy) {
     waitingFunctionList.push({
       function: finishGame,

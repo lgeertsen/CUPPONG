@@ -62,7 +62,7 @@ function createWindow () {
       width: width,
       height: height,
       closable: false,
-      frame: false,
+      // frame: false,
       icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
     })
 
@@ -122,7 +122,7 @@ if (secondWindow != null) {
     // when you should delete the corresponding element.
     mainWindow = null
     if (secondWindow != null) {
-      secondWindow.close()
+      // secondWindow.close()
       secondWindow.destroy()
       secondWindow = null;
     }

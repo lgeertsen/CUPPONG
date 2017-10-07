@@ -20,6 +20,8 @@ var teamNameInput = document.getElementById("teamName");
 var player1NameInput = document.getElementById("player1Name");
 var player2NameInput = document.getElementById("player2Name");
 
+var messageBox = document.getElementById("messageBox");
+
 var Team = function(id, name, p1, p2) {
   this.id = id;
   this.name = name;
@@ -31,12 +33,8 @@ var Team = function(id, name, p1, p2) {
 }
 Team.list = [];
 // new Team(0, "βΔΞ", "Lee Geertsen", "Valerio Ripperino");
-// for (var i = 1; i < 3; i++) {
-//   var name = "TEAMTEAMTEAMTEAM" + (i+1);
-//   new Team(i, name, "lol", "lol");
-// }
-// for (var i = 3; i < 6; i++) {
-//   var name = "TEAMTEAM TEAMTEAM" + (i+1);
+// for (var i = 1; i < 8; i++) {
+//   var name = "TEAM" + (i+1);
 //   new Team(i, name, "lol", "lol");
 // }
 
@@ -96,7 +94,7 @@ var GameMaking = function() {
     var games = [];
     for(var i in this.tables) {
       var game = this.startGame(this.tables[i]);
-      games.push({ tableId: game.table.id, team1: game.team1.name, team2: game.team2.name });
+      games.push({ round: game.round, tableId: game.table.id, team1: game.team1.name, team2: game.team2.name });
     }
     ipcRenderer.send('startGames', games);
   }
@@ -225,12 +223,14 @@ var GameMaking = function() {
           this.removeFromWaitinglist();
           var data = {
             finishedGame: {
+              round: game.round,
               tableId: game.table.id,
               team1: game.team1.name,
               team2: game.team2.name,
               winner: winner.value
             },
             newGame: {
+              round: g.round,
               tableId: g.table.id,
               team1: g.team1.name,
               team2: g.team2.name
@@ -651,16 +651,14 @@ resetId = function() {
   }
 }
 
-var messageBox = document.createElement("div");
-messageBox.className = "messageBox hidden";
-
 sendMessage = function(message) {
-  var box = messageBox;
+  var box = document.createElement("div");
+  box.className = "message hidden";
   box.innerHTML = message;
-  body.appendChild(box);
-  box.className = "messageBox animated fadeIn";
+  messageBox.appendChild(box);
+  box.className = "message animated fadeIn";
   setTimeout(function() {
-    box.className = "messageBox hidden animated fadeOut";
+    box.className = "message animated fadeOut";
     setTimeout(function() {
       box.parentNode.removeChild(box);
     }, 1000);
