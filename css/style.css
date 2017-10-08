@@ -42,9 +42,148 @@ body {
   -webkit-justify-content: space-between;
       -ms-flex-pack: justify;
           justify-content: space-between;
-  background: linear-gradient(90deg, rgba(238, 101, 136, 0.8), rgba(246, 149, 96, 0.8));
+  background-image: linear-gradient(90deg, rgba(84, 195, 225, 0.9), rgba(107, 195, 120, 0.9));
   color: #fff;
   font-size: 24px;
+}
+
+#lottery {
+  z-index: 5;
+  position: fixed;
+  top: 20px;
+  right: -500px;
+  width: 500px;
+  min-height: 300px;
+  background-color: #fff;
+  box-shadow: 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12), 0 3px 5px -1px rgba(0,0,0,0.3);
+  -moz-transition: all ease 1s;
+      -ms-transition: all ease 1s;
+      -o-transition: all ease 1s;
+      transition: all ease 1s;
+}
+#lottery.lotteryOpen {
+  right: 0;
+}
+#lottery .togglePanel {
+  position: absolute;
+  top: 10px;
+  left: -45px;
+  z-index: 3;
+  width: 45px;
+  height: 45px;
+  background-color:rgba(84, 195, 225, 0.9);
+  cursor: pointer;
+}
+#lottery .togglePanel .fa {
+  color: #fff;
+  font-size: 32px;
+  margin: 9px 7px;
+}
+#lottery .lotteryTitle {
+  padding-top: 10px;
+  height: 55px;
+  background-image: linear-gradient(90deg, rgba(84, 195, 225, 0.9), rgba(107, 195, 120, 0.9));
+  color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+}
+#lottery #loadSaveLottery {
+  position: absolute;
+  right: 5px;
+  top: 8px;
+}
+#lottery #loadSaveLottery .btn {
+  border: 2px solid #fff;
+  background-color: transparent;
+  color: #fff;
+  -webkit-transition: background-color 1s; /* Safari */
+  transition: background-color 1s;
+}
+#lottery #loadSaveLottery .btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+#lottery .priceInput .form-control {
+  border-radius: 0;
+  display: inline-block;
+}
+#lottery #priceName {
+  width: 65%;
+}
+#lottery .priceInput .input-group {
+  float: right;
+  width: 35%;
+}
+#lottery .form-control:focus {
+  border-color: rgb(84, 195, 225);
+  box-shadow: none;
+}
+#lottery .priceInput .input-group-addon {
+  border-radius: 0;
+}
+#lottery #addPrice {
+  font-size: 16px;
+  text-transform: uppercase;
+  border-radius: 0;
+}
+#lottery #addPrice,
+#lottery #priceList .price .btn,
+#lottery #lotteryPlay .btn {
+  background-color: transparent;
+  border: 2px solid rgb(84, 195, 225);
+  -webkit-transition: background-color 1s; /* Safari */
+  transition: background-color 1s;
+}
+#lottery #addPrice:hover,
+#lottery #priceList .price .btn:hover,
+#lottery #lotteryPlay .btn:hover {
+  background-color: rgba(84, 195, 225, 0.4);
+}
+#lottery #priceList {
+  position: relative;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+}
+#lottery #priceList .price {
+  padding: 5px 10px;
+  border-bottom: 1px solid #b5b5b5;
+}
+#lottery #priceList .price .priceName,
+#lottery #priceList .price .priceProb,
+#lottery #priceList .price .btnDiv {*
+  height: 36px;
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 5px;
+}
+#lottery #priceList .price .priceName {
+  width: 220px;
+}
+#lottery #priceList .price .priceProb {
+  width: 120px;
+}
+#lottery #priceList .price .btnDiv {
+  width: 70px;
+}
+#lottery #lotteryPlay {
+  padding: 15px;
+  text-align: center;
+}
+#lottery  #lotteryPlayBtn {
+  width: 250px;
+  padding: 15px;
+  font-size: 28px;
+}
+#lottery #lotteryNewTeam,
+#lottery #lotteryFinish {
+  width: 125px;
+  padding: 10px;
+  font-size: 16px;
+}
+#lottery #lotteryPlay .animation {
+  height: 50px;
+  font-size: 28px;
 }
 
 #teamInput {
@@ -161,6 +300,9 @@ body {
 #teamTable .btn {
   width: 100%;
 }
+#teamTable input[type=text] {
+  margin-top: -5px;
+}
 #teamTable .btn {
   width: 100%;
 }
@@ -168,7 +310,7 @@ body {
 #teamInput .btn {
   background-color: transparent;
   border: 2px solid rgb(238, 101, 136);
-  color: rgb(238, 101, 136) !important;
+  color: rgb(238, 101, 136);
   -webkit-transition: background-color 300ms; /* Safari */
   transition: background-color 300ms;
 }
@@ -185,21 +327,116 @@ body {
 #teamTable .tableText,
 #teamTable th,
 #teamTable th.tableText {
-  width: 24%;
+  width: 20%;
   font-size: 16px;
 }
 #teamTable .btnColumn {
+  width: 10%;
+}
+#teamTable th.present,
+#teamTable .presentBox {
   width: 10%;
 }
 #teamTable .idField,
 #teamTable .tableText {
   padding-top: 15px;
 }
+#teamTable tbody .checkbox {
+  margin: auto;
+  height: 40px;
+  width: 40px;
+  border-radius: 100%;
+  border: 1px solid #d5d5d5;
+  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  background-color: #eee;
+  color: #999;
+  -webkit-transition: background-color 0.25s ease;
+  transition: background-color 0.25s ease;
+}
+/*.checkbox:hover {
+  background: #FF9E2C;
+}*/
+.checkboxChecked {
+  background-color: #fff !important;
+  border: 1px solid #E5E5E5 !important;
+}
+.checkboxChecked .checkboxInner::before,
+.checkboxChecked .checkboxInner::after {
+  background-color: #99BF4C;
+  -webkit-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+.checkboxChecked .checkboxInner::before {
+  -webkit-transform: rotate(47deg);
+          transform: rotate(47deg);
+  width: 8.5px;
+  top: 21.5px;
+  left: 10px;
+}
+.checkboxChecked .checkboxInner::after {
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+  left: 22.5px;
+}
+.checkboxChecked:hover .checkboxInner::before,
+.checkboxChecked:hover .checkboxInner::after {
+  background: #FF0000;
+}
+.checkboxChecked:hover .checkboxInner::before {
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
+  width: 16px;
+  top: 18.5px;
+  left: 11px;
+}
+.checkboxChecked:hover .checkboxInner::after {
+  height: 16px;
+  top: 11px;
+  left: 18.5px;
+}
+.checkboxInner {
+  position: relative;
+}
+.checkboxInner::before, .checkboxInner::after {
+  position: absolute;
+  content: '';
+  background-color: #999;
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+.checkboxInner::before {
+  height: 1px;
+  width: 16px;
+  top: 18.5px;
+  left: 11px;
+}
+.checkboxInner::after {
+  width: 1px;
+  height: 16px;
+  top: 11px;
+  left: 18.5px;
+}
+.checkbox__input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+}
+
+#teamTable tbody tr:hover {
+  background: linear-gradient(90deg, rgba(238, 101, 136, 0.9), rgba(246, 149, 96, 0.9));
+}
+#teamTable tbody tr:hover span {
+  color: #fff;
+}
+#teamTable tbody tr:hover .btn {
+  border-color: #fff;
+  color: #fff;
+}
 
 /*#teamTable tbody {
   overflow-y: scroll;
 }*/
-
 
 #overview #tablesListDiv {
   padding: 0;
@@ -320,13 +557,18 @@ body {
   color: #fff !important;
 }
 
-#waitingList {
+#menu {
   position: absolute;
   top: 0;
   right: 0;
   padding: 0;
   height: 100%;
   background-color: #eee;
+}
+
+#waitingList {
+  width: 100%;
+  height: 90%;
 }
 
 #waitingList #nextMatches {
@@ -367,6 +609,12 @@ body {
   margin: 0;
 }
 
+#prices {
+  width: 100%;
+  height: 10%;
+  background-color: red;
+}
+
 #champions {
   position: fixed;
   top: 0;
@@ -396,6 +644,19 @@ body {
 
 #champions #championsPlayers {
   font-size: 50px;
+}
+
+#champions #newGameBtn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  width: 300px;
+  height: 50px;
+  background-color: transparent;
+  background-image: linear-gradient(90deg, rgba(84, 195, 225, 0.9), rgba(107, 195, 120, 0.9));
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
 }
 
 /*#champions #championsPlayer1,

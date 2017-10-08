@@ -5,6 +5,7 @@ body.style.height = window.innerHeight + "px";
 var splashScreen = document.getElementById("splashScreen");
 var overview = document.getElementById("overview");
 var newGame = document.getElementById("newGame");
+var lottery = document.getElementById("lottery");
 
 var tablesList = document.getElementById("tablesList");
 var waitingList = document.getElementById("nextMatches");
@@ -77,7 +78,7 @@ var Renderer = function() {
                 cupTable.className = "cupTable animated fadeOut";
                 setTimeout(function() {
                   cupTable.className = "cupTable hidden";
-                  endBusy();
+                  endBusy(true);
                 }, 1000);
               }, 2000);
             }, 1500);
@@ -130,12 +131,30 @@ var Renderer = function() {
             cupTable.className = "cupTable animated fadeOut";
             setTimeout(function() {
               cupTable.className = "cupTable hidden";
-              endBusy();
+              endBusy(true);
             }, 1000);
           }, 2000);
         }, 1500);
       }, 1500);
     }, 2000);
+  }
+
+  this.playLottery = function(data) {
+    busy = true;
+    lottery.className = "animated fadeIn";
+    var price = data.price;
+    var winner = data.winner;
+    var emptyPrice = "";
+    for(var i = 0; i < price.length; i++) {
+      emptyPrice += " ";
+    }
+    var emptyWinner = "";
+    for(var i = 0; i < winner.length; i++) {
+      emptyWinner += " ";
+    }
+
+    odoo.default({ el:'.animationPrice', from: emptyPrice, to: price, animationDelay: 3000, duration: 8000 });
+    odoo.default({ el:'.animationTeam', from: emptyWinner, to: winner, animationDelay: 3000, duration: 10000 });
   }
 
   this.champions = function(data) {
@@ -352,6 +371,17 @@ ipcRenderer.on('champions', (event, data) => {
   }
 });
 
+ipcRenderer.on('playLottery', (event, data) => {
+  if(busy) {
+    waitingFunctionList.push({
+      function: playLottery,
+      data: data
+    });
+  } else {
+    playLottery(data);
+  }
+});
+
 function startGame(game) {
   if(newGame.className == "hidden") {
     newGame.className = "animated fadeIn";
@@ -370,19 +400,25 @@ function champions(data) {
   renderer.champions(data);
 }
 
+function playLottery(data) {
+  renderer.playLottery(data);
+}
+
 function callFunction(callback, data) {
   callback(data);
 }
 
-function endBusy() {
+function endBusy(fade) {
   busy = false;
   if(waitingFunctionList.length > 0) {
     var f = waitingFunctionList.shift();
     callFunction(f.function, f.data);
-  } else {
+  } else if(fade) {
     newGame.className = "animated fadeOut";
     setTimeout(function(){
       newGame.className = "hidden";
     }, 1000);
+  } else {
+    newGame.className = "hidden";
   }
 }

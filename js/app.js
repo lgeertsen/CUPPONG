@@ -7,6 +7,16 @@ body.style.height = window.innerHeight + "px";
 var teamList = document.getElementById("teamList");
 teamList.style.height = (window.innerHeight * 0.85) + "px";
 
+var lotteryDiv = document.getElementById("lottery");
+lotteryDiv.style.maxHeight = (window.innerHeight - 40) + "px";
+var priceList = document.getElementById("priceList");
+priceList.style.maxHeight = (window.innerHeight - 180) + "px";
+var loadSaveLottery = document.getElementById("loadSaveLottery");
+var lotteryEdit = document.getElementById("lotteryEdit");
+var lotteryPlay = document.getElementById("lotteryPlay");
+var lotteryPlayBtn = document.getElementById("lotteryPlayBtn");
+var lotteryWin = document.getElementById("lotteryWin");
+
 var main = document.getElementById("main");
 
 var overview = document.getElementById("overview");
@@ -14,30 +24,32 @@ var tablesList = document.getElementById("tablesList");
 tablesList.style.height = (window.innerHeight * 0.9) + "px";
 var roundNb = document.getElementById("roundNb");
 var nextMatches = document.getElementById("nextMatches");
-nextMatches.style.height = (window.innerHeight * 0.9) + "px";
+nextMatches.style.height = (window.innerHeight - 0.9) + "px";
 
 var teamNameInput = document.getElementById("teamName");
 var player1NameInput = document.getElementById("player1Name");
 var player2NameInput = document.getElementById("player2Name");
 
+var priceNameInput = document.getElementById("priceName");
+var priceProbInput = document.getElementById("priceProb");
+
 var messageBox = document.getElementById("messageBox");
 
-var Team = function(id, name, p1, p2) {
+var Team = function(id, name, p1, p2, present) {
   this.id = id;
   this.name = name;
   this.player1 = p1;
   this.player2 = p2;
-  this.present = false;
+  this.present = present;
 
   Team.list.push(this);
 }
 Team.list = [];
-// new Team(0, "βΔΞ", "Lee Geertsen", "Valerio Ripperino");
+// new Team(0, "βΔΞ", "Lee Geertsen", "Valerio Ripperino", true);
 // for (var i = 1; i < 8; i++) {
 //   var name = "TEAM" + (i+1);
-//   new Team(i, name, "lol", "lol");
+//   new Team(i, name, "lol", "lol", true);
 // }
-
 
 var Table = function(id) {
   this.id = id;
@@ -57,6 +69,65 @@ var Game = function() {
 
   return this;
 }
+
+var Price = function(id, name, prob) {
+  this.id = id;
+  this.name = name;
+  this.prob = prob;
+
+  Price.list.push(this);
+}
+Price.list = [];
+
+var Lottery = function() {
+  this.prices = [];
+  this.teams = [];
+  this.probTable = [];
+  this.inPlay = false;
+
+  this.play = function() {
+    if(!this.inPlay) {
+      this.inPlay = true;
+      var priceId = random(0, this.probTable.length-1);
+      var price = this.prices[this.probTable[priceId]].name;
+      var winnerId = random(0, this.teams.length-1);
+      var winner = this.teams[winnerId].name;
+      var emptyPrice = "";
+      for(var i = 0; i < price.length; i++) {
+        emptyPrice += " ";
+      }
+      var emptyWinner = "";
+      for(var i = 0; i < winner.length; i++) {
+        emptyWinner += " ";
+      }
+      lotteryPlayBtn.className = "hidden";
+      lotteryWin.className = "";
+
+      var data = { price: price, winner: winner };
+      ipcRenderer.send('playLottery', data);
+
+      odoo.default({ el:'.animationPrice', from: emptyPrice, to: price, animationDelay: 1000, duration: 2000 });
+      odoo.default({ el:'.animationTeam', from: emptyWinner, to: winner, animationDelay: 1000, duration: 2000 });
+    }
+  }
+
+  this.finish = function() {
+    this.inPlay = false;
+    lotteryPlayBtn.className = "";
+    lotteryWin.className = "hidden";
+  }
+
+  this.makeTable = function() {
+    var total = 0;
+    for(var i = 0; i < this.prices.length; i++) {
+      var p = this.prices[i];
+      for(var j = 0; j < p.prob; j++) {
+        this.probTable.push(p.id);
+      }
+    }
+  }
+}
+let lottery = new Lottery();
 
 var GameMaking = function() {
   this.teamsList = [];
@@ -243,7 +314,7 @@ var GameMaking = function() {
   }
 
   this.shuffle = function() {
-    this.teamsList = Team.list;
+    // this.teamsList = Team.list;
     var l = this.teamsList.length;
     for(var i = 0; i < l; i++) {
       var index = random(0, l);
@@ -461,13 +532,13 @@ addTeam = function() {
   //   player2: player2Name
   // });
   var teamId = Team.list.length;
-  new Team(teamId, teamName, player1Name, player2Name);
+  new Team(teamId, teamName, player1Name, player2Name, false);
   if(teamName.length > 0 && player1Name.length > 0 && player2Name.length > 0) {
-    addTeamToList(teamId, teamName, player1Name, player2Name);
+    addTeamToList(teamId, teamName, player1Name, player2Name, false);
   }
 }
 
-addTeamToList = function(teamid, teamName, player1Name, player2Name) {
+addTeamToList = function(teamid, teamName, player1Name, player2Name, present) {
   var tr = document.createElement("tr");
 
   var id = document.createElement("td");
@@ -537,6 +608,25 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name) {
   removeBtnTd.appendChild(removeBtn);
   tr.appendChild(removeBtnTd);
 
+  var presentTd = document.createElement("td");
+  presentTd.className = "presentBox";
+  var presentLabel = document.createElement("span");
+  if(present) {
+    presentLabel.className = "checkbox checkboxChecked";
+  } else {
+    presentLabel.className = "checkbox";
+  }
+  presentLabel.onclick = function() {teamPresent(this)};
+  var presentSpan = document.createElement("span");
+  presentSpan.className = "checkboxInner";
+  // var presentCheck = document.createElement("input");
+  // presentCheck.type = "checkbox";
+  // presentCheck.className = "checkboxInput";
+  // presentSpan.appendChild(presentCheck);
+  presentLabel.appendChild(presentSpan);
+  presentTd.appendChild(presentLabel);
+  tr.appendChild(presentTd);
+
   teamList.appendChild(tr);
   tr.scrollIntoView();
 }
@@ -597,6 +687,150 @@ removeTeam = function(btn) {
   resetId();
 }
 
+teamPresent = function(obj) {
+  var tr = obj.parentNode.parentNode;
+  var id = tr.querySelector(".idField").innerHTML;
+  if(obj.className == "checkbox") {
+    obj.className = "checkbox checkboxChecked";
+    Team.list[id-1].present = true;
+  } else {
+    obj.className = "checkbox";
+    Team.list[id-1].present = false;
+  }
+}
+
+addPrice = function() {
+  var priceName = priceNameInput.value.trim();
+  var priceProb = priceProbInput.value.trim();
+  var priceId = Price.list.length-1;
+  new Price(priceId, priceName, priceProb);
+  if(priceName.length > 0 && priceProb.length > 0) {
+    addPriceToList(priceId, priceName, priceProb);
+  }
+}
+
+addPriceToList = function(id, priceName, priceProb) {
+  var li = document.createElement("li");
+  li.className = "price";
+  li.id = "price" + id;
+
+  var idField = document.createElement("span");
+  idField.innerHTML = id;
+  idField.className = "idField hidden";
+  li.appendChild(idField);
+
+  var nameDiv = document.createElement("div");
+  nameDiv.className = "priceName";
+
+  var priceNameSpan = document.createElement("span");
+  priceNameSpan.innerHTML = priceName;
+  nameDiv.appendChild(priceNameSpan);
+  var nameEdit = document.createElement("input");
+  nameEdit.value = priceName;
+  nameEdit.className = "nameEdit form-control hidden";
+  nameDiv.appendChild(nameEdit);
+  li.appendChild(nameDiv);
+
+  var probDiv = document.createElement("div");
+  probDiv.className = "priceProb";
+
+  var priceProbSpan = document.createElement("span");
+  priceProbSpan.innerHTML = priceProb + "%";
+  probDiv.appendChild(priceProbSpan);
+  var inputGroup = document.createElement("div");
+  inputGroup.className = "input-group hidden";
+  var probEdit = document.createElement("input");
+  probEdit.type = "number";
+  probEdit.value = priceProb;
+  probEdit.className = "probEdit form-control";
+  inputGroup.appendChild(probEdit);
+  var inputGroupAddon = document.createElement("div");
+  inputGroupAddon.className = "input-group-addon";
+  inputGroupAddon.innerHTML = "%";
+  inputGroup.appendChild(inputGroupAddon);
+  probDiv.appendChild(inputGroup);
+  li.appendChild(probDiv);
+
+  var editBtnDiv = document.createElement("div");
+  editBtnDiv.className = "btnDiv";
+  var editBtn = document.createElement("button");
+  editBtn.innerHTML = "Edit";
+  editBtn.className = "btn editBtn";
+  editBtn.id = "edit" + Team.list.length;
+  editBtn.onclick = function() {editPrice(this)};
+  editBtnDiv.appendChild(editBtn);
+  var saveBtn = document.createElement("button");
+  saveBtn.innerHTML = "Save";
+  saveBtn.className = "btn saveBtn hidden";
+  saveBtn.id = "save" + Team.list.length;
+  saveBtn.onclick = function() {savePrice(this)};
+  editBtnDiv.appendChild(saveBtn);
+  li.appendChild(editBtnDiv);
+
+  var removeBtnDiv = document.createElement("div");
+  removeBtnDiv.className = "btnDiv";
+  var removeBtn = document.createElement("button");
+  removeBtn.innerHTML = "Remove";
+  removeBtn.className = "btn";
+  removeBtn.onclick = function() {removePrice(this)};
+  removeBtnDiv.appendChild(removeBtn);
+  li.appendChild(removeBtnDiv);
+
+  priceList.appendChild(li);
+  li.scrollIntoView();
+}
+
+editPrice = function(btn) {
+  var li = btn.parentNode.parentNode;
+  var nameSpan = li.querySelector(".priceName span");
+  var nameEdit = li.querySelector(".nameEdit");
+  var probSpan = li.querySelector(".priceProb span");
+  var probGroup = li.querySelector(".input-group");
+  //var probEdit = li.querySelector(".probEdit");
+  var saveBtn = li.querySelector(".saveBtn");
+
+  nameSpan.className = "hidden";
+  nameEdit.className = "nameEdit form-control";
+  probSpan.className = "hidden";
+  probGroup.className = "input-group";
+  btn.className = "btn editBtn hidden";
+  saveBtn.className = "btn saveBtn";
+}
+
+savePrice = function(btn) {
+  var li = btn.parentNode.parentNode;
+  var id = li.querySelector(".idField").innerHTML;
+  var nameSpan = li.querySelector(".priceName span");
+  var nameEdit = li.querySelector(".nameEdit");
+  var probSpan = li.querySelector(".priceProb span");
+  var probGroup = li.querySelector(".input-group");
+  var probEdit = li.querySelector(".probEdit");
+  var editBtn = li.querySelector(".editBtn");
+
+  Price.list[id].name = nameEdit.value;
+  Price.list[id].prob = probEdit.value;
+
+  nameSpan.innerHTML = nameEdit.value;
+  probSpan.innerHTML = probEdit.value + "%";
+  nameSpan.className = "";
+  nameEdit.className = "nameEdit form-control hidden";
+  probSpan.className = "";
+  probGroup.className = "input-group hidden";
+  btn.className = "btn saveBtn hidden";
+  editBtn.className = "btn editBtn";
+}
+
+removePrice = function(btn) {
+  var li = btn.parentNode.parentNode;
+  var id = li.querySelector(".idField").innerHTML;
+  li.parentNode.removeChild(li);
+  Team.list.splice(id-1, 1);
+}
+
+playLottery = function() {
+  lottery.play();
+}
+
 saveTeamsToFile = function() {
   dialog.showSaveDialog({ defaultPath: '/teams.cupPong',
     filters: [{ name: 'Cup Pong Teams', extensions: ['cupPong'] }]}, (fileName) => {
@@ -605,6 +839,23 @@ saveTeamsToFile = function() {
           return;
       }
       var obj = { teams: Team.list };
+      let content = JSON.stringify(obj);
+      fs.writeFile(fileName, content, (err) => {
+          if(err){
+              alert("An error ocurred creating the file "+ err.message)
+          }
+          // alert("The file has been succesfully saved");
+      });
+  });
+}
+savePricesToFile = function() {
+  dialog.showSaveDialog({ defaultPath: '/prices.cupPongPrice',
+    filters: [{ name: 'Cup Pong Prices', extensions: ['cupPongPrice'] }]}, (fileName) => {
+      if (fileName === undefined){
+          // console.log("You didn't save the file");
+          return;
+      }
+      var obj = { teams: Price.list };
       let content = JSON.stringify(obj);
       fs.writeFile(fileName, content, (err) => {
           if(err){
@@ -637,11 +888,39 @@ loadTeamsFromFile = function() {
         teamList.innerHTML = "";
         for(var i = 0; i < obj.teams.length; i++) {
           var t = obj.teams[i];
-          new Team(t.id, t.name, t.player1, t.player2);
-          addTeamToList(t.id, t.name, t.player1, t.player2);
+          new Team(t.id, t.name, t.player1, t.player2, t.present);
+          addTeamToList(t.id, t.name, t.player1, t.player2, t.present);
         }
     });
-});
+  });
+}
+loadPricesFromFile = function() {
+  dialog.showOpenDialog({ filters: [
+     { name: 'Cup Pong Prices', extensions: ['cupPongPrice'] }
+   ]}, (fileNames) => {
+    // fileNames is an array that contains all the selected
+    if(fileNames === undefined){
+        // console.log("No file selected");
+        return;
+    }
+    var fileName = fileNames[0];
+    fs.readFile(fileName, 'utf-8', (err, data) => {
+        if(err){
+            alert("An error ocurred reading the file :" + err.message);
+            return;
+        }
+        // console.log("The file content is : " + data);
+        var obj = JSON.parse(data);
+        // console.log(obj);
+        Price.list = [];
+        priceList.innerHTML = "";
+        for(var i = 0; i < obj.teams.length; i++) {
+          var p = obj.teams[i];
+          new Price(p.id, p.name, p.prob);
+          addPriceToList(p.id, p.name, p.prob);
+        }
+    });
+  });
 }
 
 resetId = function() {
@@ -665,20 +944,44 @@ sendMessage = function(message) {
   }, 4000);
 }
 
+toggleLottery = function() {
+  if(lotteryDiv.className == "") {
+    lotteryDiv.className = "lotteryOpen";
+  } else {
+    lotteryDiv.className = "";
+  }
+}
+
 startGame = function() {
   if(Team.list.length < 2) {
     sendMessage("Vous devez ajouter au moins 2 équipes");
     return;
   }
-  gameMaker.nbTables = document.getElementById("nbTables").value
-  if(gameMaker.nbTables > Team.list.length / 2) {
-    var nb = Team.list.length;
-    if(nb % 2 == 1) {
-      nb -= 1;
+  gameMaker.nbTables = document.getElementById("nbTables").value;
+  gameMaker.teamsList = [];
+  for(var i = 0; i < Team.list.length; i++) {
+    if(Team.list[i].present) {
+      gameMaker.teamsList.push(Team.list[i]);
+      lottery.teams.push(Team.list[i]);
     }
-    gameMaker.nbTables = nb/2;
   }
-  gameMaker.start();
+  if(gameMaker.teamsList.length > 1) {
+    if(gameMaker.nbTables > (gameMaker.teamsList / 2)) {
+      var nb = Team.list.length;
+      if(nb % 2 == 1) {
+        nb -= 1;
+      }
+      gameMaker.nbTables = nb/2;
+    }
+    lottery.prices = Price.list;
+    lottery.makeTable();
+    loadSaveLottery.className = "hidden";
+    lotteryEdit.className = "hidden";
+    lotteryPlay.className = "";
+    gameMaker.start();
+  } else {
+    sendMessage("Il n'y a pas assez d'équipes présents");
+  }
 }
 
 random = function(min, max) {

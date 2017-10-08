@@ -28,7 +28,7 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     width: width,
     height: height,
-    minWidth: 800,
+    minWidth: 1000,
     minHeigth: 600,
     icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
   })
@@ -86,8 +86,8 @@ function createWindow () {
   secondWindow.setMenu(null);
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
-  // secondWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
+  secondWindow.webContents.openDevTools()
 
 if (secondWindow != null) {
   ipcMain.on('createTables', (event, data) => {
@@ -108,6 +108,10 @@ if (secondWindow != null) {
 
   ipcMain.on('finishDelete', (event, data) => {
     secondWindow.webContents.send('finishDelete', data)
+  })
+
+  ipcMain.on('playLottery', (event, data) => {
+    secondWindow.webContents.send('playLottery', data)
   })
 
   ipcMain.on('champions', (event, data) => {
