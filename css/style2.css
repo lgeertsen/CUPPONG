@@ -258,7 +258,15 @@ body {
   font-size: 70px;
   text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
   fill: #fff;
-  display: flex;
+  /*display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center;*/
+}
+
+#lottery .lotteryContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }

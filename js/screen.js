@@ -153,8 +153,8 @@ var Renderer = function() {
       emptyWinner += " ";
     }
 
-    odoo.default({ el:'.animationPrice', from: emptyPrice, to: price, animationDelay: 3000, duration: 8000 });
-    odoo.default({ el:'.animationTeam', from: emptyWinner, to: winner, animationDelay: 3000, duration: 10000 });
+    odoo.default({ el:'.animationPrice', from: emptyPrice, to: price, animationDelay: 3000, duration: 5000 });
+    odoo.default({ el:'.animationTeam', from: emptyWinner, to: winner, animationDelay: 3000, duration: 7000 });
   }
 
   this.champions = function(data) {

@@ -1,6 +1,7 @@
 const { ipcRenderer } = require('electron');
 const {dialog} = require('electron').remote;
 var fs = require('fs');
+var convertExcel = require('excel-as-json').processFile;
 
 var body = document.getElementById("body");
 body.style.height = window.innerHeight + "px";
@@ -891,6 +892,38 @@ loadTeamsFromFile = function() {
           new Team(t.id, t.name, t.player1, t.player2, t.present);
           addTeamToList(t.id, t.name, t.player1, t.player2, t.present);
         }
+    });
+  });
+}
+loadTeamsFromExcel = function() {
+  dialog.showOpenDialog({ filters: [
+     { name: 'Excel (.xlsx)', extensions: ['xlsx'] }
+   ]}, (fileNames) => {
+    // fileNames is an array that contains all the selected
+    if(fileNames === undefined){
+        // console.log("No file selected");
+        return;
+    }
+    var fileName = fileNames[0];
+    // fs.readFile(fileName, 'utf-8', (err, data) => {
+    //     if(err){
+    //         alert("An error ocurred reading the file :" + err.message);
+    //         return;
+    //     }
+    //     // console.log("The file content is : " + data);
+    //     var obj = JSON.parse(data);
+    //     // console.log(obj);
+    //     Team.list = [];
+    //     teamList.innerHTML = "";
+    //     for(var i = 0; i < obj.teams.length; i++) {
+    //       var t = obj.teams[i];
+    //       new Team(t.id, t.name, t.player1, t.player2, t.present);
+    //       addTeamToList(t.id, t.name, t.player1, t.player2, t.present);
+    //     }
+    // });
+    convertExcel(fileName, undefined, undefined, (err, data) => {
+      if(err) {throw err}
+      console.log(data);
     });
   });
 }

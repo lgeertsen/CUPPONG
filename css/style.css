@@ -224,7 +224,8 @@ body {
 }
 
 #sidebar #saveTeams,
-#sidebar #loadTeams {
+#sidebar #loadTeams,
+#sidebar #loadTeamsExcel {
   display: block;
   margin: 10px 0;
   margin-left: 10%;
@@ -237,7 +238,8 @@ body {
 }
 
 #sidebar #saveTeams:hover,
-#sidebar #loadTeams:hover {
+#sidebar #loadTeams:hover,
+#sidebar #loadTeamsExcel:hover {
   background-color: rgba(255,255,255,0.3);
 }
 
