@@ -114,6 +114,14 @@ if (secondWindow != null) {
     secondWindow.webContents.send('playLottery', data)
   })
 
+  ipcMain.on('lotteryNewTeam', (event, data) => {
+    secondWindow.webContents.send('lotteryNewTeam', data)
+  })
+
+  ipcMain.on('finishLottery', (event) => {
+    secondWindow.webContents.send('finishLottery')
+  })
+
   ipcMain.on('champions', (event, data) => {
     secondWindow.webContents.send('champions', data)
   })

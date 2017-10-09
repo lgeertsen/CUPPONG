@@ -157,6 +157,28 @@ var Renderer = function() {
     odoo.default({ el:'.animationTeam', from: emptyWinner, to: winner, animationDelay: 3000, duration: 7000 });
   }
 
+  this.lotteryNewTeam = function(data) {
+    var winner = data.winner
+    var loser = data.loser;
+    while(loser.length > winner.length) {
+      winner += " ";
+      if(loser.length > winner.length) {
+        winner = " " + winner;
+      }
+    }
+
+    odoo.default({ el:'.animationTeam', from: loser, to: winner, animationDelay: 2000, duration: 4000 });
+  }
+
+  this.finishLottery = function() {
+    lottery.className = "animated fadeOut";
+    newGame.className = "hidden";
+    setTimeout(function() {
+      lottery.className = "hidden";
+      endBusy(false);
+    }, 1000);
+  }
+
   this.champions = function(data) {
     var champions = document.getElementById("champions");
     var newChamps = document.getElementById("newChamps");
@@ -380,6 +402,14 @@ ipcRenderer.on('playLottery', (event, data) => {
   } else {
     playLottery(data);
   }
+});
+
+ipcRenderer.on('lotteryNewTeam', (event, data) => {
+  renderer.lotteryNewTeam(data);
+});
+
+ipcRenderer.on('finishLottery', (event) => {
+  renderer.finishLottery();
 });
 
 function startGame(game) {

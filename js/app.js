@@ -85,6 +85,7 @@ var Lottery = function() {
   this.teams = [];
   this.probTable = [];
   this.inPlay = false;
+  this.winner;
 
   this.play = function() {
     if(!this.inPlay) {
@@ -93,6 +94,8 @@ var Lottery = function() {
       var price = this.prices[this.probTable[priceId]].name;
       var winnerId = random(0, this.teams.length-1);
       var winner = this.teams[winnerId].name;
+      this.winner = winner;
+      this.teams.splice(winnerId, 1);
       var emptyPrice = "";
       for(var i = 0; i < price.length; i++) {
         emptyPrice += " ";
@@ -112,10 +115,29 @@ var Lottery = function() {
     }
   }
 
+  this.newTeam = function() {
+    var winnerId = random(0, this.teams.length-1);
+    var winner = this.teams[winnerId].name;
+    var loser = this.winner;
+    this.teams.splice(winnerId, 1);
+    while(loser.length > winner.length) {
+      winner += " ";
+      if(loser.length > winner.length) {
+        winner = " " + winner;
+      }
+    }
+    this.winner = winner;
+    var data = { loser: loser, winner: winner };
+    ipcRenderer.send('lotteryNewTeam', data);
+
+    odoo.default({ el:'.animationTeam', from: loser, to: winner, animationDelay: 1000, duration: 2000 });
+  }
+
   this.finish = function() {
     this.inPlay = false;
-    lotteryPlayBtn.className = "";
+    lotteryPlayBtn.className = "btn";
     lotteryWin.className = "hidden";
+    ipcRenderer.send('finishLottery');
   }
 
   this.makeTable = function() {
@@ -830,6 +852,14 @@ removePrice = function(btn) {
 
 playLottery = function() {
   lottery.play();
+}
+
+lotteryNewTeam = function() {
+  lottery.newTeam();
+}
+
+finishLottery = function() {
+  lottery.finish();
 }
 
 saveTeamsToFile = function() {
