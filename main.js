@@ -43,7 +43,7 @@ function createWindow () {
   }))
 
   if (externalDisplay) {
-  // if(true) {
+  // if(false) {
     secondWindow = new BrowserWindow({
       // width: width,
       // height: height,

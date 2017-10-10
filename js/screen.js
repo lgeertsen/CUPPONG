@@ -8,6 +8,7 @@ var newGame = document.getElementById("newGame");
 var lottery = document.getElementById("lottery");
 
 var tablesList = document.getElementById("tablesList");
+var roundContainer = document.getElementById("roundContainer");
 // var waitingList = document.getElementById("nextMatches");
 
 let busy = false;
@@ -201,18 +202,39 @@ var Renderer = function() {
     }, 1000);
   }
 
+  this.createRound = function(id) {
+    var round = document.createElement("div");
+    round.className = "row roundDiv";
+    round.id = "round" + id;
+    var roundDiv = document.createElement("div");
+    roundDiv.className = "col-sm-12";
+    var roundName = document.createElement("h1");
+    roundName.className = "roundName";
+    if(id == 0) {
+      roundName.innerHTML = "Finale";
+    } else {
+      var x = Math.pow(2, id);
+      roundName.innerHTML = "1/" + x + " finale";
+    }
+    roundDiv.appendChild(roundName);
+    round.appendChild(roundDiv);
+    roundContainer.appendChild(round);
+  }
+
   this.createTable = function(id, total) {
     var div = document.createElement("div");
     div.className = "col-sm-4 cupTableContainer";
-    if(total % 3 == 1) {
-      total += 2;
-    } else if(total % 3 == 2) {
-      total++;
-    }
-    console.log(total);
-    div.style.height = (window.innerHeight * (0.9 / (total/3))) + "px";
+    // if(total % 3 == 1) {
+    //   total++;
+    //   total++;
+    // } else if(total % 3 == 2) {
+    //   total++;
+    // }
+    // div.style.height = (window.innerHeight * (1 / (total/3))) + "px";
     var tableId = "table" + id;
     div.id = tableId;
+    div.setAttribute("round", -1);
+    div.setAttribute("tableId", id);
 
     var cupTable = document.createElement("div");
     cupTable.className = "cupTable";
@@ -262,6 +284,31 @@ var Renderer = function() {
     var team2 = table.querySelector(".team2name");
     team1.innerHTML = game.team1;
     team2.innerHTML = game.team2;
+
+    if(table.getAttribute("round") != game.round) {
+      var roundId = "round" + game.round;
+      var round = document.getElementById(roundId);
+      table.setAttribute("round", game.round);
+      if(round.childNodes[1] != undefined) {
+        var i = 1;
+        var x = parseInt(table.getAttribute("tableId"));
+        while(round.childNodes[i] != undefined && x > round.childNodes[i].getAttribute("tableId")) {
+          i++;
+        }
+        round.insertBefore(table, round.childNodes[i]);
+      } else {
+        round.insertBefore(table, round.childNodes[1]);
+      }
+    }
+    for(var i = 0; i < roundContainer.querySelectorAll(".roundDiv").length; i++) {
+      var id = "round" + i;
+      var round = document.getElementById(id);
+      if(round.childNodes.length < 2) {
+        round.className = "row roundDiv hidden";
+      } else {
+        round.className = "row roundDiv";
+      }
+    }
   }
 
   this.createWaitinglist = function(games) {
@@ -301,13 +348,16 @@ var Renderer = function() {
 var renderer = new Renderer();
 
 ipcRenderer.on('createTables', (event, data) => {
+  for(var i = 0; i < data.nbRounds; i++) {
+    renderer.createRound(i);
+  }
   for(var i = 0; i < data.nbTables; i++) {
     renderer.createTable(i+1, data.nbTables);
   }
-  if(data.nbTables % 2 != 0) {
-    var table = tablesList.querySelector(".cupTableContainer:last-child");
-    table.className = "col-sm-6 col-sm-offset-3 cupTableContainer";
-  }
+  // if(data.nbTables % 2 != 0) {
+  //   var table = tablesList.querySelector(".cupTableContainer:last-child");
+  //   table.className = "col-sm-6 col-sm-offset-3 cupTableContainer";
+  // }
   splashScreen.className = "hidden";
   newGame.className = "";
   overview.className = "";
@@ -342,11 +392,11 @@ ipcRenderer.on('finishGame', (event, data) => {
       data: data.newGame
     });
   }
-  var obj = waitingList.querySelector('.nextMatch:first-child');
+  // var obj = waitingList.querySelector('.nextMatch:first-child');
   setTimeout(function() {
-    if(obj) {
-      obj.parentNode.removeChild(obj);
-    }
+    // if(obj) {
+    //   obj.parentNode.removeChild(obj);
+    // }
     renderer.updateTable(data.newGame);
   });
 });
@@ -365,15 +415,15 @@ ipcRenderer.on('finishDelete', (event, data) => {
   var parent = obj.parentNode;
   setTimeout(function() {
     parent.removeChild(obj);
-    var tables = parent.querySelectorAll(".cupTableContainer");
-    for(var i = 0; i < tables.length; i++) {
-      tables[i].style.height = (window.innerHeight * (0.9 / (tables.length/2))) + "px";
-    }
-    if(tables.length % 2 == 0) {
-      tables[tables.length-1].className = "col-sm-6 cupTableContainer";
-    } else {
-      tables[tables.length-1].className = "col-sm-6 col-sm-offset-3 cupTableContainer";
-    }
+    // var tables = parent.querySelectorAll(".cupTableContainer");
+    // for(var i = 0; i < tables.length; i++) {
+    //   tables[i].style.height = (window.innerHeight * (0.9 / (tables.length/2))) + "px";
+    // }
+    // if(tables.length % 2 == 0) {
+    //   tables[tables.length-1].className = "col-sm-6 cupTableContainer";
+    // } else {
+    //   tables[tables.length-1].className = "col-sm-6 col-sm-offset-3 cupTableContainer";
+    // }
   }, 1000)
 });
 

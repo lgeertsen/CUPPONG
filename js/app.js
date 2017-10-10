@@ -23,7 +23,7 @@ var main = document.getElementById("main");
 
 var overview = document.getElementById("overview");
 var tablesList = document.getElementById("tablesList");
-tablesList.style.height = (window.innerHeight * 0.9) + "px";
+tablesList.style.height = window.innerHeight + "px";
 // var roundNb = document.getElementById("roundNb");
 var nextMatches = document.getElementById("nextMatches");
 nextMatches.style.height = (window.innerHeight - 0.9) + "px";
@@ -170,17 +170,18 @@ var GameMaking = function() {
   this.roundGame = 0;
 
   this.start = function() {
-    var data = { nbTables: this.nbTables };
-    ipcRenderer.send('createTables', data);
+
     this.shuffle();
     this.teams = this.teamsList.length;
     this.games = this.teams-1;
     this.makeTree();
 
     this.createRounds();
-
-
     this.createTables();
+
+    var data = { nbTables: this.nbTables, nbRounds: this.totalRounds };
+    ipcRenderer.send('createTables', data);
+
     this.round++;
     // this.showRound();
     main.className = "hidden";
@@ -310,6 +311,10 @@ var GameMaking = function() {
         if(table.getAttribute("delete") == "true" || this.waitingList.length == 0) {
           this.tables[game.table.id-1].inUse = false;
           var parent = table.parentNode;
+          // this.tables.splice(game.table.id-1, 1);
+          // for(var i = 0; i < this.tables.length; i++) {
+          //   this.tables[i].id = i+1;
+          // }
           parent.removeChild(table);
           var data = {
             tableId: game.table.id,
@@ -373,13 +378,14 @@ var GameMaking = function() {
   }
 
   this.createRounds = function() {
-    for(var i = this.totalRounds-1; i >= 0; i--) {
+    for(var i = 0; i < this.totalRounds; i++) {
       var round = document.createElement("div");
       round.className = "row";
       round.id = "round" + i;
       var roundDiv = document.createElement("div");
       roundDiv.className = "col-sm-12";
       var roundName = document.createElement("h1");
+      roundName.className = "roundName";
       if(i == 0) {
         roundName.innerHTML = "Finale";
       } else {
@@ -405,15 +411,16 @@ var GameMaking = function() {
     var tableId = "table" + nb;
     cupTable.id = tableId;
     cupTable.setAttribute("round", -1);
+    cupTable.setAttribute("tableId", nb);
 
-    // var closeDiv = document.createElement("div");
-    // closeDiv.className = "close";
-    // var close = document.createElement("i");
-    // close.className = "fa fa-times";
-    // close.setAttribute("aria-hidden", "true");
-    // close.onclick = function() {gameMaker.setDeleteTable(this)};
-    // closeDiv.appendChild(close);
-    // cupTable.appendChild(closeDiv);
+    var closeDiv = document.createElement("div");
+    closeDiv.className = "close";
+    var close = document.createElement("i");
+    close.className = "fa fa-times";
+    close.setAttribute("aria-hidden", "true");
+    close.onclick = function() {gameMaker.setDeleteTable(this)};
+    closeDiv.appendChild(close);
+    cupTable.appendChild(closeDiv);
 
     var tableTitleDiv = document.createElement("div");
     tableTitleDiv.className = "tableTitle";
@@ -509,7 +516,7 @@ var GameMaking = function() {
     var tableId = "table" + game.table.id;
     var table = document.getElementById(tableId);
     var t1 = table.querySelector(".team1name");
-    t1.innerHTML = game.team1.name + " " + game.round;
+    t1.innerHTML = game.team1.name;
     var t2 = table.querySelector(".team2name");
     t2.innerHTML = game.team2.name;
     var button = table.querySelector(".teamWinBtn");
@@ -519,13 +526,73 @@ var GameMaking = function() {
       var roundId = "round" + game.round;
       var round = document.getElementById(roundId);
       table.setAttribute("round", game.round);
-      round.insertBefore(table, round.childNodes[game.table.id]);
+      if(round.childNodes[1] != undefined) {
+        var i = 1;
+        var x = parseInt(table.getAttribute("tableId"));
+        while(round.childNodes[i] != undefined && x > round.childNodes[i].getAttribute("tableId")) {
+          i++;
+        }
+        round.insertBefore(table, round.childNodes[i]);
+      } else {
+        round.insertBefore(table, round.childNodes[1]);
+      }
+    }
+    for(var i = 0; i < this.totalRounds; i++) {
+      var id = "round" + i;
+      var round = document.getElementById(id);
+      if(round.childNodes.length < 2) {
+        round.className = "row hidden";
+      } else {
+        round.className = "row";
+      }
     }
   }
 
   this.setDeleteTable = function(e) {
     var table = e.parentNode.parentNode;
+    var id = table.getAttribute("tableId");
+    var box = document.createElement("div");
+    box.className = "message hidden";
+    box.setAttribute("tableId", id);
+
+    var span = document.createElement("span");
+    span.innerHTML = "Voulez vous enlever la table après la partie?";
+    box.appendChild(span);
+
+    var b1 = document.createElement("button");
+    b1.className = "btn";
+    b1.innerHTML = "OUI"
+    b1.onclick = function() {gameMaker.confirmDeleteTable(this)};
+    box.appendChild(b1);
+
+    var b2 = document.createElement("button");
+    b2.className = "btn";
+    b2.innerHTML = "NON"
+    b2.onclick = function() {gameMaker.dontDeleteTable(this)};
+    box.appendChild(b2);
+
+    messageBox.appendChild(box);
+    box.className = "message animated fadeIn";
+    // table.setAttribute("delete", "true");
+  }
+
+  this.confirmDeleteTable = function(e) {
+    var box = e.parentNode;
+    var id = "table" + box.getAttribute("tableId");
+    var table = document.getElementById(id);
     table.setAttribute("delete", "true");
+    box.className = "message animated fadeOut";
+    setTimeout(function() {
+      box.parentNode.removeChild(box);
+    }, 1000);
+  }
+
+  this.dontDeleteTable = function(e) {
+    var box = e.parentNode;
+    box.className = "message animated fadeOut";
+    setTimeout(function() {
+      box.parentNode.removeChild(box);
+    }, 1000);
   }
 
   this.showWaitingList = function() {
