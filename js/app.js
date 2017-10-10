@@ -951,10 +951,8 @@ loadTeamsFromExcel = function() {
     //       addTeamToList(t.id, t.name, t.player1, t.player2, t.present);
     //     }
     // });
-    convertExcel(fileName, undefined, undefined, (err, data) => {
-      if(err) {throw err}
-      console.log(data);
-    });
+
+    //console.log(XLSX.utils.sheet_to_html(fileName));
   });
 }
 loadPricesFromFile = function() {
