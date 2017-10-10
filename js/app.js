@@ -7,6 +7,7 @@ var body = document.getElementById("body");
 body.style.height = window.innerHeight + "px";
 var teamList = document.getElementById("teamList");
 teamList.style.height = (window.innerHeight * 0.85) + "px";
+var roundContainer = document.getElementById("roundContainer");
 
 var lotteryDiv = document.getElementById("lottery");
 lotteryDiv.style.maxHeight = (window.innerHeight - 40) + "px";
@@ -23,7 +24,7 @@ var main = document.getElementById("main");
 var overview = document.getElementById("overview");
 var tablesList = document.getElementById("tablesList");
 tablesList.style.height = (window.innerHeight * 0.9) + "px";
-var roundNb = document.getElementById("roundNb");
+// var roundNb = document.getElementById("roundNb");
 var nextMatches = document.getElementById("nextMatches");
 nextMatches.style.height = (window.innerHeight - 0.9) + "px";
 
@@ -54,8 +55,9 @@ Team.list = [];
 
 var Table = function(id) {
   this.id = id;
-  this.free = true;
-  this.inUse = true;
+  this.inUse = false;
+
+  this.game;
 
   return this;
 }
@@ -174,9 +176,13 @@ var GameMaking = function() {
     this.teams = this.teamsList.length;
     this.games = this.teams-1;
     this.makeTree();
+
+    this.createRounds();
+
+
     this.createTables();
     this.round++;
-    this.showRound();
+    // this.showRound();
     main.className = "hidden";
     overview.className = "";
     this.startGames();
@@ -366,6 +372,26 @@ var GameMaking = function() {
     this.roundLength = this.gameTree[this.totalRounds-1].length;
   }
 
+  this.createRounds = function() {
+    for(var i = this.totalRounds-1; i >= 0; i--) {
+      var round = document.createElement("div");
+      round.className = "row";
+      round.id = "round" + i;
+      var roundDiv = document.createElement("div");
+      roundDiv.className = "col-sm-12";
+      var roundName = document.createElement("h1");
+      if(i == 0) {
+        roundName.innerHTML = "Finale";
+      } else {
+        var x = Math.pow(2, i);
+        roundName.innerHTML = "1/" + x + " finale";
+      }
+      roundDiv.appendChild(roundName);
+      round.appendChild(roundDiv);
+      roundContainer.appendChild(round);
+    }
+  }
+
   this.createTables = function() {
     for(var i = 0; i < this.nbTables; i++) {
       this.tables[i] = new Table(i+1);
@@ -378,6 +404,7 @@ var GameMaking = function() {
     cupTable.className = "col-sm-6 cupTable";
     var tableId = "table" + nb;
     cupTable.id = tableId;
+    cupTable.setAttribute("round", -1);
 
     // var closeDiv = document.createElement("div");
     // closeDiv.className = "close";
@@ -482,12 +509,18 @@ var GameMaking = function() {
     var tableId = "table" + game.table.id;
     var table = document.getElementById(tableId);
     var t1 = table.querySelector(".team1name");
-    t1.innerHTML = game.team1.name;
+    t1.innerHTML = game.team1.name + " " + game.round;
     var t2 = table.querySelector(".team2name");
     t2.innerHTML = game.team2.name;
     var button = table.querySelector(".teamWinBtn");
     button.setAttribute("round", game.round);
     button.setAttribute("game", game.game);
+    if(table.getAttribute("round") != game.round) {
+      var roundId = "round" + game.round;
+      var round = document.getElementById(roundId);
+      table.setAttribute("round", game.round);
+      round.insertBefore(table, round.childNodes[game.table.id]);
+    }
   }
 
   this.setDeleteTable = function(e) {
@@ -539,9 +572,9 @@ var GameMaking = function() {
     obj.parentNode.removeChild(obj);
   }
 
-  this.showRound = function() {
-    roundNb.innerHTML = this.round;
-  }
+  // this.showRound = function() {
+  //   roundNb.innerHTML = this.round;
+  // }
 }
 let gameMaker = new GameMaking();
 

@@ -8,7 +8,7 @@ var newGame = document.getElementById("newGame");
 var lottery = document.getElementById("lottery");
 
 var tablesList = document.getElementById("tablesList");
-var waitingList = document.getElementById("nextMatches");
+// var waitingList = document.getElementById("nextMatches");
 
 let busy = false;
 let waitingFunctionList = [];
@@ -203,11 +203,14 @@ var Renderer = function() {
 
   this.createTable = function(id, total) {
     var div = document.createElement("div");
-    div.className = "col-sm-6 cupTableContainer";
-    if(total % 2 == 1) {
+    div.className = "col-sm-4 cupTableContainer";
+    if(total % 3 == 1) {
+      total += 2;
+    } else if(total % 3 == 2) {
       total++;
     }
-    div.style.height = (window.innerHeight * (0.9 / (total/2))) + "px";
+    console.log(total);
+    div.style.height = (window.innerHeight * (0.9 / (total/3))) + "px";
     var tableId = "table" + id;
     div.id = tableId;
 
@@ -262,38 +265,38 @@ var Renderer = function() {
   }
 
   this.createWaitinglist = function(games) {
-    for(var i = 0; i < games.length; i++) {
-      this.addToWaitingList(games[i]);
-    }
+    // for(var i = 0; i < games.length; i++) {
+    //   this.addToWaitingList(games[i]);
+    // }
   }
 
-  this.addToWaitingList = function(game) {
-    var nextMatch = document.createElement("li");
-    nextMatch.className = "nextMatch";
-
-    var team1div = document.createElement("div");
-    team1div.className = "team1";
-    var team1name = document.createElement("h5");
-    team1name.innerHTML = game.team1;
-    team1div.appendChild(team1name);
-    nextMatch.appendChild(team1div);
-
-    var vsDiv = document.createElement("div");
-    vsDiv.className = "vs";
-    var vs = document.createElement("h3");
-    vs.innerHTML = "VS";
-    vsDiv.appendChild(vs);
-    nextMatch.appendChild(vsDiv);
-
-    var team2div = document.createElement("div");
-    team2div.className = "team2";
-    var team2name = document.createElement("h5");
-    team2name.innerHTML = game.team2;
-    team2div.appendChild(team2name);
-    nextMatch.appendChild(team2div);
-
-    waitingList.appendChild(nextMatch);
-  }
+  // this.addToWaitingList = function(game) {
+  //   var nextMatch = document.createElement("li");
+  //   nextMatch.className = "nextMatch";
+  //
+  //   var team1div = document.createElement("div");
+  //   team1div.className = "team1";
+  //   var team1name = document.createElement("h5");
+  //   team1name.innerHTML = game.team1;
+  //   team1div.appendChild(team1name);
+  //   nextMatch.appendChild(team1div);
+  //
+  //   var vsDiv = document.createElement("div");
+  //   vsDiv.className = "vs";
+  //   var vs = document.createElement("h3");
+  //   vs.innerHTML = "VS";
+  //   vsDiv.appendChild(vs);
+  //   nextMatch.appendChild(vsDiv);
+  //
+  //   var team2div = document.createElement("div");
+  //   team2div.className = "team2";
+  //   var team2name = document.createElement("h5");
+  //   team2name.innerHTML = game.team2;
+  //   team2div.appendChild(team2name);
+  //   nextMatch.appendChild(team2div);
+  //
+  //   waitingList.appendChild(nextMatch);
+  // }
 }
 var renderer = new Renderer();
 
