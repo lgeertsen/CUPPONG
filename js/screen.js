@@ -354,9 +354,13 @@ ipcRenderer.on('createTables', (event, data) => {
   for(var i = 0; i < data.nbTables; i++) {
     renderer.createTable(i+1, data.nbTables);
   }
-  // if(data.nbTables % 2 != 0) {
+  // if(data.nbTables % 3 == 1) {
   //   var table = tablesList.querySelector(".cupTableContainer:last-child");
-  //   table.className = "col-sm-6 col-sm-offset-3 cupTableContainer";
+  //   table.className = "col-sm-4 col-sm-offset-4 cupTableContainer";
+  // } else if(data.nbTables % 3 == 2) {
+  //   var tables = document.querySelectorAll(".cupTableContainer");
+  //   tables[tables.length-2].className = "col-sm-4 col-sm-offset-2 cupTableContainer";
+  //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
   // }
   splashScreen.className = "hidden";
   newGame.className = "";
@@ -419,10 +423,15 @@ ipcRenderer.on('finishDelete', (event, data) => {
     // for(var i = 0; i < tables.length; i++) {
     //   tables[i].style.height = (window.innerHeight * (0.9 / (tables.length/2))) + "px";
     // }
-    // if(tables.length % 2 == 0) {
-    //   tables[tables.length-1].className = "col-sm-6 cupTableContainer";
+    // if(tables.length % 3 == 0) {
+    //   tables[tables.length-2].className = "col-sm-4 cupTableContainer";
+    //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
+    // } else if(tables.length % 3 == 1) {
+    //   tables[tables.length-2].className = "col-sm-4 cupTableContainer";
+    //   tables[tables.length-1].className = "col-sm-4 col-sm-offset-4 cupTableContainer";
     // } else {
-    //   tables[tables.length-1].className = "col-sm-6 col-sm-offset-3 cupTableContainer";
+    //   tables[tables.length-2].className = "col-sm-4 col-sm-offset-2 cupTableContainer";
+    //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
     // }
   }, 1000)
 });
