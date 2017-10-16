@@ -4,6 +4,9 @@ var body = document.getElementById("body");
 body.style.height = window.innerHeight + "px";
 var splashScreen = document.getElementById("splashScreen");
 var overview = document.getElementById("overview");
+
+var bracketsOverview = document.getElementById("bracketsOverview")
+
 var newGame = document.getElementById("newGame");
 var lottery = document.getElementById("lottery");
 
