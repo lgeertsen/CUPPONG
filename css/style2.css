@@ -527,7 +527,7 @@ html {
   display: flex;
   width: 100%;
   background-color: #ffffff;
-  padding: 1em;
+  padding: 5px;
   border: 1px solid transparent;
   border-radius: 0.1em;
   /*box-shadow: 0 2px 0 0 #e5e5e5;*/
@@ -653,8 +653,16 @@ html {
   text-align: center;
 }
 
-.tournament-bracket__match h2 {
-  margin: 15px 0 15px;
+.tournament-bracket__match .team1 {
+  margin-bottom: 0;
+}
+
+.tournament-bracket__match .vs {
+  margin: 10px 0 10px;
+}
+
+.tournament-bracket__match .team2 {
+  margin-top: 0;
 }
 
 .tournament-bracket__round:last-child .tournament-bracket__match::before,
