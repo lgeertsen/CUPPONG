@@ -54,10 +54,16 @@
             <div id="teamInput">
                 <!-- <h1>Team list</h1> -->
               <div id="inputDiv">
-                <input type="text" id="teamName" class="form-control" name="teamName" value="" placeholder="Team name">
-                <input type="text" id="player1Name" class="form-control" name="player1" value="" placeholder="Player 1 name">
-                <input type="text" id="player2Name" class="form-control" name="player2" value="" placeholder="Player 2 name">
-                <button id="addTeam" class="btn btn-block" type="button" name="button" onclick="addTeam()">Add team</button>
+                <div class="">
+                  <input type="text" id="teamName" class="form-control" name="teamName" value="" placeholder="Team name">
+                  <input type="text" id="player1Name" class="form-control" name="player1" value="" placeholder="Player 1 name">
+                  <input type="text" id="player2Name" class="form-control" name="player2" value="" placeholder="Player 2 name">
+                </div>
+                <div class="secondeLine">
+                  <button id="addTeam" class="btn btn-block" type="button" name="button" onclick="addTeam()">Add team</button>
+                  <input type="text" id="player1Licence" class="form-control" name="player1L" value="" placeholder="Player 1 licence">
+                  <input type="text" id="player2Licence" class="form-control" name="player2L" value="" placeholder="Player 2 licence">
+                </div>
               </div>
             </div>
             <table id="teamTable" class="table table-striped">
@@ -85,6 +91,7 @@
       </div>
     </div>
     <div id="overview" class="hidden">
+      <button id="showBracketBtn" class="btn" type="button" name="button">Show bracket</button>
       <div class="container-fluid">
         <div class="rows">
           <div id="tablesListDiv" class="col-sm-9">
@@ -179,7 +186,7 @@
 
   <!-- <script src="js/jquery.js" type="text/javascript"></script>
   <script src="js/bootstrap.min.js" type="text/javascript"></script> -->
-  <!-- <script src="js/xlsx.full.min.js" type="text/javascript"></script> -->
+  <script src="js/xlsx.full.min.js" type="text/javascript"></script>
   <script src="js/textAnimation.js" type="text/javascript"></script>
   <script src="js/app.js" type="text/javascript">
   </script>

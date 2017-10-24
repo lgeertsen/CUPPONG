@@ -31,17 +31,21 @@ nextMatches.style.height = (window.innerHeight - 0.9) + "px";
 var teamNameInput = document.getElementById("teamName");
 var player1NameInput = document.getElementById("player1Name");
 var player2NameInput = document.getElementById("player2Name");
+var player1LicenceInput = document.getElementById("player1Licence");
+var player2LicenceInput = document.getElementById("player2Licence");
 
 var priceNameInput = document.getElementById("priceName");
 var priceProbInput = document.getElementById("priceProb");
 
 var messageBox = document.getElementById("messageBox");
 
-var Team = function(id, name, p1, p2, present) {
+var Team = function(id, name, p1, p2, p1L, p2L, present) {
   this.id = id;
   this.name = name;
   this.player1 = p1;
   this.player2 = p2;
+  this.player1Licence = p1L;
+  this.player2Licence = p2L;
   this.present = present;
 
   Team.list.push(this);
@@ -649,19 +653,21 @@ addTeam = function() {
   var teamName = teamNameInput.value.trim();
   var player1Name = player1NameInput.value.trim();
   var player2Name = player2NameInput.value.trim();
+  var player1Licence = player1LicenceInput.value.trim();
+  var player2Licence = player2LicenceInput.value.trim();
   // teams.push({
   //   name: teamName,
   //   player1: player1Name,
   //   player2: player2Name
   // });
-  var teamId = Team.list.length;
-  new Team(teamId, teamName, player1Name, player2Name, false);
   if(teamName.length > 0 && player1Name.length > 0 && player2Name.length > 0) {
-    addTeamToList(teamId, teamName, player1Name, player2Name, false);
+    var teamId = Team.list.length;
+    new Team(teamId, teamName, player1Name, player2Name, player1Licence, player2Licence, false);
+    addTeamToList(teamId, teamName, player1Name, player2Name, player1Licence, player2Licence, false);
   }
 }
 
-addTeamToList = function(teamid, teamName, player1Name, player2Name, present) {
+addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Licence, player2Licence, present) {
   var tr = document.createElement("tr");
 
   var id = document.createElement("td");
@@ -674,10 +680,10 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, present) {
   var teamSpan = document.createElement("span");
   teamSpan.innerHTML = teamName;
   teamSpan.className = "teamSpan";
+  team.appendChild(teamSpan);
   var teamEdit = document.createElement("input");
   teamEdit.value = teamName;
   teamEdit.className = "teamEdit form-control hidden";
-  team.appendChild(teamSpan);
   team.appendChild(teamEdit);
   tr.appendChild(team);
 
@@ -686,11 +692,19 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, present) {
   var p1Span = document.createElement("span");
   p1Span.innerHTML = player1Name;
   p1Span.className = "p1Span";
+  p1.appendChild(p1Span);
+  var p1LicenceSpan = document.createElement("h6");
+  p1LicenceSpan.innerHTML = player1Licence;
+  p1LicenceSpan.className = "p1LicenceSpan";
+  p1.appendChild(p1LicenceSpan);
   var p1Edit = document.createElement("input");
   p1Edit.value = player1Name;
   p1Edit.className = "p1Edit form-control hidden";
-  p1.appendChild(p1Span);
   p1.appendChild(p1Edit);
+  var p1LicenceEdit = document.createElement("input");
+  p1LicenceEdit.value = player1Licence;
+  p1LicenceEdit.className = "p1LicenceEdit form-control hidden";
+  p1.appendChild(p1LicenceEdit);
   tr.appendChild(p1);
 
   var p2 = document.createElement("td");
@@ -698,11 +712,19 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, present) {
   var p2Span = document.createElement("span");
   p2Span.innerHTML = player2Name;
   p2Span.className = "p2Span";
+  p2.appendChild(p2Span);
+  var p2LicenceSpan = document.createElement("h6");
+  p2LicenceSpan.innerHTML = player2Licence;
+  p2LicenceSpan.className = "p2LicenceSpan";
+  p2.appendChild(p2LicenceSpan);
   var p2Edit = document.createElement("input");
   p2Edit.value = player2Name;
   p2Edit.className = "p2Edit form-control hidden";
-  p2.appendChild(p2Span);
   p2.appendChild(p2Edit);
+  var p2LicenceEdit = document.createElement("input");
+  p2LicenceEdit.value = player2Licence;
+  p2LicenceEdit.className = "p2LicenceEdit form-control hidden";
+  p2.appendChild(p2LicenceEdit);
   tr.appendChild(p2);
 
   var editBtnTd = document.createElement("td");
@@ -759,17 +781,25 @@ editTeam = function(btn) {
   var teamSpan = tr.querySelector(".teamSpan");
   var teamEdit = tr.querySelector(".teamEdit");
   var p1Span = tr.querySelector(".p1Span");
+  var p1LicenceSpan = tr.querySelector(".p1LicenceSpan");
   var p1Edit = tr.querySelector(".p1Edit");
+  var p1LicenceEdit = tr.querySelector(".p1LicenceEdit");
   var p2Span = tr.querySelector(".p2Span");
+  var p2LicenceSpan = tr.querySelector(".p2LicenceSpan");
   var p2Edit = tr.querySelector(".p2Edit");
+  var p2LicenceEdit = tr.querySelector(".p2LicenceEdit");
   var saveBtn = tr.querySelector(".saveBtn");
 
   teamSpan.className = "teamSpan hidden";
   teamEdit.className = "teamEdit form-control";
   p1Span.className = "p1Span hidden";
+  p1LicenceSpan.className = "p1LicenceSpan hidden";
   p1Edit.className = "p1Edit form-control";
+  p1LicenceEdit.className = "p1LicenceEdit form-control";
   p2Span.className = "p2Span hidden";
+  p2LicenceSpan.className = "p2LicenceSpan hidden";
   p2Edit.className = "p2Edit form-control";
+  p2LicenceEdit.className = "p2LicenceEdit form-control";
   btn.className = "btn editBtn hidden";
   saveBtn.className = "btn saveBtn";
 }
@@ -780,24 +810,36 @@ saveTeam = function(btn) {
   var teamSpan = tr.querySelector(".teamSpan");
   var teamEdit = tr.querySelector(".teamEdit");
   var p1Span = tr.querySelector(".p1Span");
+  var p1LicenceSpan = tr.querySelector(".p1LicenceSpan");
   var p1Edit = tr.querySelector(".p1Edit");
+  var p1LicenceEdit = tr.querySelector(".p1LicenceEdit");
   var p2Span = tr.querySelector(".p2Span");
+  var p2LicenceSpan = tr.querySelector(".p2LicenceSpan");
   var p2Edit = tr.querySelector(".p2Edit");
+  var p2LicenceEdit = tr.querySelector(".p2LicenceEdit");
   var editBtn = tr.querySelector(".editBtn");
 
   Team.list[id-1].name = teamEdit.value;
   Team.list[id-1].player1 = p1Edit.value;
+  Team.list[id-1].player1Licence = p1LicenceEdit.value;
   Team.list[id-1].player2 = p2Edit.value;
+  Team.list[id-1].player2Licence = p2LicenceEdit.value;
 
   teamSpan.innerHTML = teamEdit.value;
   p1Span.innerHTML = p1Edit.value;
+  p1LicenceSpan.innerHTML = p1LicenceEdit.value;
   p2Span.innerHTML = p2Edit.value;
+  p2LicenceSpan.innerHTML = p2LicenceEdit.value;
   teamSpan.className = "teamSpan";
   teamEdit.className = "teamEdit form-control hidden";
   p1Span.className = "p1Span";
+  p1LicenceSpan.className = "p1LicenceSpan";
   p1Edit.className = "p1Edit form-control hidden";
+  p1LicenceEdit.className = "p1LicenceEdit form-control hidden";
   p2Span.className = "p2Span";
+  p2LicenceSpan.className = "p2LicenceSpan";
   p2Edit.className = "p2Edit form-control hidden";
+  p2LicenceEdit.className = "p2LicenceEdit form-control hidden";
   btn.className = "btn saveBtn hidden";
   editBtn.className = "btn editBtn";
 }
@@ -1019,8 +1061,8 @@ loadTeamsFromFile = function() {
         teamList.innerHTML = "";
         for(var i = 0; i < obj.teams.length; i++) {
           var t = obj.teams[i];
-          new Team(t.id, t.name, t.player1, t.player2, t.present);
-          addTeamToList(t.id, t.name, t.player1, t.player2, t.present);
+          new Team(t.id, t.name, t.player1, t.player2, t.player1Licence, t.player2Licence, t.present);
+          addTeamToList(t.id, t.name, t.player1, t.player2, t.player1Licence, t.player2Licence, t.present);
         }
     });
   });

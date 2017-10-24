@@ -212,9 +212,13 @@ body {
   padding: 0 5px;
 }*/
 
+#teamInput .secondeLine {
+  margin-top: 5px;
+}
+
 #teamInput .form-control,
 #teamInput .btn {
-  width: 22%;
+  width: 30%;
   display: inline-block;
   margin: 0 1%;
 }
@@ -314,6 +318,10 @@ body {
 #teamTable input,
 #teamTable .btn {
   width: 100%;
+}
+#teamTable .p1LicenceEdit,
+#teamTable .p2LicenceEdit {
+  margin-top: 5px;
 }
 #teamTable input[type=text] {
   margin-top: -5px;
@@ -452,6 +460,14 @@ body {
 /*#teamTable tbody {
   overflow-y: scroll;
 }*/
+
+#overview #showBracketBtn {
+  z-index: 202002333443434;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+}
 
 #overview #tablesListDiv {
   padding: 0;
