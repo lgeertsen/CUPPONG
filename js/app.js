@@ -192,7 +192,7 @@ var GameMaking = function() {
     overview.className = "";
     this.startGames();
     this.showWaitingList();
-  }
+  };
 
   this.startGames = function() {
     this.assignTeamsToGame();
@@ -333,6 +333,7 @@ var GameMaking = function() {
           var data = {
             finishedGame: {
               round: game.round,
+              game: game.game,
               tableId: game.table.id,
               team1: game.team1.name,
               team2: game.team2.name,
@@ -340,6 +341,7 @@ var GameMaking = function() {
             },
             newGame: {
               round: g.round,
+              game: g.game,
               tableId: g.table.id,
               team1: g.team1.name,
               team2: g.team2.name
@@ -571,7 +573,7 @@ var GameMaking = function() {
 
     var b2 = document.createElement("button");
     b2.className = "btn";
-    b2.innerHTML = "NON"
+    b2.innerHTML = "NON";
     b2.onclick = function() {gameMaker.dontDeleteTable(this)};
     box.appendChild(b2);
 
@@ -608,7 +610,7 @@ var GameMaking = function() {
       waitingList.push({ team1: t1.name, team2: t2.name });
     }
     ipcRenderer.send('waitingList', waitingList);
-  }
+  };
 
   this.addToWaitingList = function(team1, team2) {
     var nextMatch = document.createElement("li");
@@ -636,17 +638,17 @@ var GameMaking = function() {
     nextMatch.appendChild(team2div);
 
     nextMatches.appendChild(nextMatch);
-  }
+  };
 
   this.removeFromWaitinglist = function() {
     var obj = nextMatches.querySelector(".nextMatch:first-child");
     obj.parentNode.removeChild(obj);
-  }
+  };
 
   // this.showRound = function() {
   //   roundNb.innerHTML = this.round;
   // }
-}
+};
 let gameMaker = new GameMaking();
 
 addTeam = function() {
@@ -665,7 +667,7 @@ addTeam = function() {
     new Team(teamId, teamName, player1Name, player2Name, player1Licence, player2Licence, false);
     addTeamToList(teamId, teamName, player1Name, player2Name, player1Licence, player2Licence, false);
   }
-}
+};
 
 addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Licence, player2Licence, present) {
   var tr = document.createElement("tr");
@@ -676,7 +678,7 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Lice
   tr.appendChild(id);
 
   var team = document.createElement("td");
-  team.className = "tableText"
+  team.className = "tableText";
   var teamSpan = document.createElement("span");
   teamSpan.innerHTML = teamName;
   teamSpan.className = "teamSpan";
@@ -688,7 +690,7 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Lice
   tr.appendChild(team);
 
   var p1 = document.createElement("td");
-  p1.className = "tableText"
+  p1.className = "tableText";
   var p1Span = document.createElement("span");
   p1Span.innerHTML = player1Name;
   p1Span.className = "p1Span";
@@ -708,7 +710,7 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Lice
   tr.appendChild(p1);
 
   var p2 = document.createElement("td");
-  p2.className = "tableText"
+  p2.className = "tableText";
   var p2Span = document.createElement("span");
   p2Span.innerHTML = player2Name;
   p2Span.className = "p2Span";
@@ -862,6 +864,10 @@ teamPresent = function(obj) {
     obj.className = "checkbox";
     Team.list[id-1].present = false;
   }
+}
+
+showBracket = function() {
+  ipcRenderer.send('showBracket');
 }
 
 addPrice = function() {

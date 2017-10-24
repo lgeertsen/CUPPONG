@@ -313,6 +313,15 @@ var Renderer = function() {
     }
   }
 
+  this.updateBracketTable = function(game) {
+    var id = "game" + game.round + game.game;
+    var table = document.getElementById(id);
+    var team1 = table.querySelector(".team1");
+    var team2 = table.querySelector(".team2");
+    team1.innerHTML = game.team1;
+    team2.innerHTML = game.team2;
+  }
+
   this.createWaitinglist = function(games) {
     // for(var i = 0; i < games.length; i++) {
     //   this.addToWaitingList(games[i]);
@@ -380,31 +389,43 @@ ipcRenderer.on('waitingList', (event, data) => {
   renderer.createWaitinglist(data);
 });
 
+ipcRenderer.on('showBracket', (event) => {
+  bracketsOverview.className = "animated fadeIn";
+  setTimeout(function() {
+    overview.className = "hidden";
+  },1000);
+});
+
 ipcRenderer.on('finishGame', (event, data) => {
-  //console.log(data.newGame.round);
-  if(busy) {
-    waitingFunctionList.push({
-      function: finishGame,
-      data: data.finishedGame
-    });
-    waitingFunctionList.push({
-      function: startGame,
-      data: data.newGame
-    });
+  if(data.finishedGame.round < 4) {
+
   } else {
-    finishGame(data.finishedGame);
+    if(busy) {
+      waitingFunctionList.push({
+        function: finishGame,
+        data: data.finishedGame
+      });
+    } else {
+      finishGame(data.finishedGame);
+    }
+  }
+  if(data.newGame.round < 4) {
+    renderer.updateBracketTable(data.newGame);
+    var tableId = "table" + data.newGame.tableId;
+    var obj = document.getElementById(tableId);
+    if(obj) {
+      var parent = obj.parentNode;
+      parent.removeChild(obj);
+    }
+  } else {
     waitingFunctionList.push({
       function: startGame,
       data: data.newGame
+    });
+    setTimeout(function() {
+      renderer.updateTable(data.newGame);
     });
   }
-  // var obj = waitingList.querySelector('.nextMatch:first-child');
-  setTimeout(function() {
-    // if(obj) {
-    //   obj.parentNode.removeChild(obj);
-    // }
-    renderer.updateTable(data.newGame);
-  });
 });
 
 ipcRenderer.on('finishDelete', (event, data) => {
@@ -418,24 +439,26 @@ ipcRenderer.on('finishDelete', (event, data) => {
   }
   var tableId = "table" + data.tableId;
   var obj = document.getElementById(tableId);
-  var parent = obj.parentNode;
-  setTimeout(function() {
-    parent.removeChild(obj);
-    // var tables = parent.querySelectorAll(".cupTableContainer");
-    // for(var i = 0; i < tables.length; i++) {
-    //   tables[i].style.height = (window.innerHeight * (0.9 / (tables.length/2))) + "px";
-    // }
-    // if(tables.length % 3 == 0) {
-    //   tables[tables.length-2].className = "col-sm-4 cupTableContainer";
-    //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
-    // } else if(tables.length % 3 == 1) {
-    //   tables[tables.length-2].className = "col-sm-4 cupTableContainer";
-    //   tables[tables.length-1].className = "col-sm-4 col-sm-offset-4 cupTableContainer";
-    // } else {
-    //   tables[tables.length-2].className = "col-sm-4 col-sm-offset-2 cupTableContainer";
-    //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
-    // }
-  }, 1000)
+  if(obj) {
+    var parent = obj.parentNode;
+    setTimeout(function() {
+      parent.removeChild(obj);
+      // var tables = parent.querySelectorAll(".cupTableContainer");
+      // for(var i = 0; i < tables.length; i++) {
+      //   tables[i].style.height = (window.innerHeight * (0.9 / (tables.length/2))) + "px";
+      // }
+      // if(tables.length % 3 == 0) {
+      //   tables[tables.length-2].className = "col-sm-4 cupTableContainer";
+      //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
+      // } else if(tables.length % 3 == 1) {
+      //   tables[tables.length-2].className = "col-sm-4 cupTableContainer";
+      //   tables[tables.length-1].className = "col-sm-4 col-sm-offset-4 cupTableContainer";
+      // } else {
+      //   tables[tables.length-2].className = "col-sm-4 col-sm-offset-2 cupTableContainer";
+      //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
+      // }
+    }, 1000);
+  }
 });
 
 ipcRenderer.on('champions', (event, data) => {

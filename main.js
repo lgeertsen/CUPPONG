@@ -102,6 +102,10 @@ if (secondWindow != null) {
     secondWindow.webContents.send('waitingList', data)
   })
 
+  ipcMain.on('showBracket', (event) => {
+    secondWindow.webContents.send('showBracket')
+  })
+
   ipcMain.on('finishGame', (event, data) => {
     secondWindow.webContents.send('finishGame', data)
   })
