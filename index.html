@@ -12,8 +12,20 @@
 
     <div id="messageBox"></div>
 
+    <div id="lateTeams" class="hidden">
+      <div id="toggleLateTeams" onclick="toggleLateTeams()">
+        <i class="fa fa-user"></i>
+      </div>
+      <div class="lateTeamsTitle">
+        <span>LATE TEAMS</span>
+      </div>
+      <div id="lateTeamsDiv">
+        <ul id="lateTeamsList"></ul>
+      </div>
+    </div>
+
     <div id="lottery" class="">
-      <div class="togglePanel" onclick="toggleLottery()">
+      <div id="toggleLottery" onclick="toggleLottery()">
         <i class="fa fa-random"></i>
       </div>
       <div class="lotteryTitle">
@@ -31,6 +43,7 @@
             <div class="input-group-addon">%</div>
           </div>
           <button id="addPrice" class="btn btn-block" type="button" name="button" onclick="addPrice()">Add price</button>
+          <button id="validateLottery" class="btn btn-block hidden" type="button" name="button" onclick="startLottery()">START</button>
         </div>
         <ul id="priceList"></ul>
       </div>
@@ -91,10 +104,10 @@
       </div>
     </div>
     <div id="overview" class="hidden">
-      <button id="showBracketBtn" class="btn" type="button" name="button" onclick="showBracket()">Show bracket</button>
+      <button id="showBracketBtn" class="btn" type="button" name="button" onclick="showBracket()">Montrer arbre</button>
       <div class="container-fluid">
         <div class="rows">
-          <div id="tablesListDiv" class="col-sm-9">
+          <div id="tablesListDiv" class="col-sm-12">
             <div class="container-fluid">
               <!-- <div class="row">
                 <h2>Round <span id="roundNb">0</span></h2>
@@ -147,11 +160,11 @@
               </div>
             </div>
           </div>
-          <div id="menu" class="col-sm-3">
+          <!-- <div id="menu" class="col-sm-3">
             <div id="waitingList">
               <h1>NEXT MATCHES</h1>
               <ul id="nextMatches">
-                <!-- <li class="nextMatch">
+                <li class="nextMatch">
                   <div class="team1">
                     <h5>Team 1</h5>
                   </div>
@@ -161,19 +174,19 @@
                   <div class="team2">
                     <h5>Team 2</h5>
                   </div>
-                </li> -->
+                </li>
 
               </ul>
             </div>
             <div id="pricesDiv">
 
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
     <div id="champions" class="hidden">
-      <button id="newGameBtn" class="btn" type="button" name="newGameBtn">New Game</button>
+      <!-- <button id="newGameBtn" class="btn" type="button" name="newGameBtn">New Game</button> -->
       <div>
         <h2>Our new Cup Pong champions!!!</h2>
         <h1 id="championsTeam">Teamname</h1>

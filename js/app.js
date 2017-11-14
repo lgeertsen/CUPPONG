@@ -9,6 +9,11 @@ var teamList = document.getElementById("teamList");
 teamList.style.height = (window.innerHeight * 0.85) + "px";
 var roundContainer = document.getElementById("roundContainer");
 
+var lateTeamsDiv = document.getElementById("lateTeams");
+lateTeamsDiv.style.maxHeight = (window.innerHeight - 40) + "px";
+var lateTeamsList = document.getElementById("lateTeamsList");
+lateTeamsList.style.maxHeight = (window.innerHeight - 100) + "px";
+
 var lotteryDiv = document.getElementById("lottery");
 lotteryDiv.style.maxHeight = (window.innerHeight - 40) + "px";
 var priceList = document.getElementById("priceList");
@@ -25,8 +30,8 @@ var overview = document.getElementById("overview");
 var tablesList = document.getElementById("tablesList");
 tablesList.style.height = window.innerHeight + "px";
 // var roundNb = document.getElementById("roundNb");
-var nextMatches = document.getElementById("nextMatches");
-nextMatches.style.height = (window.innerHeight - 0.9) + "px";
+// var nextMatches = document.getElementById("nextMatches");
+// nextMatches.style.height = (window.innerHeight - 0.9) + "px";
 
 var teamNameInput = document.getElementById("teamName");
 var player1NameInput = document.getElementById("player1Name");
@@ -160,6 +165,7 @@ let lottery = new Lottery();
 
 var GameMaking = function() {
   this.teamsList = [];
+  this.absentTeams = [];
   this.waitingList = [];
   this.nbTables;
   this.tables = [];
@@ -173,11 +179,18 @@ var GameMaking = function() {
   this.roundLength = 0;
   this.roundGame = 0;
 
+  this.loserCanPlay = true;
+
   this.start = function() {
 
     this.shuffle();
     this.teams = this.teamsList.length;
-    this.games = this.teams-1;
+    this.games = 1;
+    while(this.games < this.teams-1) {
+      this.games *= 2;
+    }
+    this.games--;
+    // this.games = this.teams-1;
     this.makeTree();
 
     this.createRounds();
@@ -192,15 +205,25 @@ var GameMaking = function() {
     overview.className = "";
     this.startGames();
     this.showWaitingList();
+    this.showAbsentTeams();
   };
 
   this.startGames = function() {
     this.assignTeamsToGame();
     var games = [];
+    var gameList = [];
     for(var i in this.tables) {
       var game = this.startGame(this.tables[i]);
-      games.push({ round: game.round, tableId: game.table.id, team1: game.team1.name, team2: game.team2.name });
+      games.push({ game: game.game, round: game.round, tableId: game.table.id, team1: game.team1.name, team2: game.team2.name });
+      gameList.push(game);
     }
+    for(var i in this.tables) {
+      var game = this.nextGame(this.tables[i]);
+      games[i].nextMatch = game;
+      gameList[i].nextMatch = game;
+      this.updateTable(gameList[i]);
+    }
+
     ipcRenderer.send('startGames', games);
   }
 
@@ -208,8 +231,19 @@ var GameMaking = function() {
     // if(this.waitingList.length > 0) {
       var game = this.waitingList.shift();
       game.table = table;
+      game.started = true;
       this.updateTable(game);
     // }
+    return game;
+  }
+
+  this.nextGame = function(table) {
+    var game = this.waitingList.shift();
+    game.table = table;
+    if(game.round < 4) {
+      this.waitingList.unshift(game);
+      game = null;
+    }
     return game;
   }
 
@@ -252,11 +286,92 @@ var GameMaking = function() {
         game.team2 = team;
         game.complete = true;
         this.waitingList.push(game);
-        this.addToWaitingList(game.team1, game.team2);
+        // this.addToWaitingList(game.team1, game.team2);
         assigned = true;
       } else {
         i++;
       }
+    }
+  }
+
+  this.assignTeamToNextGame = function(team, n) {
+    var p = true;
+    if(n % 2 == 1) {
+      n--;
+      p = false;
+    }
+    var id = n/2;
+    game = this.gameTree[this.totalRounds - team.round][id];
+    if(p) {
+      game.round = this.totalRounds - team.round;
+      game.game = id;
+      game.team1 = team;
+      if(game.team2 != undefined) {
+        this.waitingList.push(game);
+        // this.addToWaitingList(game.team1, game.team2);
+      }
+    } else {
+      game.team2 = team;
+      game.complete = true;
+      if(game.team1 != undefined) {
+        this.waitingList.push(game);
+        // this.addToWaitingList(game.team1, game.team2);
+      }
+    }
+  }
+
+  this.assignLoserToGame = function(team) {
+    var joined = false;
+    var i = 0;
+    while(!joined && i < this.gameTree[this.totalRounds-1].length) {
+      var game = this.gameTree[this.totalRounds-1][i];
+      if(team.secondGame == true) {
+        if(game.team1 == undefined) {
+          game.round = this.totalRounds-1;
+          game.game = i;
+          game.team1 = team;
+          game.team1.round = 1;
+          joined = true;
+        } else if (game.team2 == undefined) {
+          game.team2 = team;
+          game.team2.round = this.totalRounds-1;
+          game.team2.round = 1;
+          game.complete = true;
+          this.waitingList.push(game);
+          joined = true;
+          if(i== this.gameTree[this.totalRounds-1].length-1) {
+            this.loserCanPlay = false;
+          }
+        }
+      } else {
+        if(!game.started) {
+          if(game.team1 == undefined || game.team1.secondGame == true) {
+            game.round = this.totalRounds-1;
+            game.game = i;
+            game.team1 = team;
+            game.team1.round = 1;
+            joined = true;
+          } else if (game.team2 == undefined || game.team2.secondGame == true) {
+            game.team2 = team;
+            game.team2.round = this.totalRounds-1;
+            game.team2.round = 1;
+            game.complete = true;
+            this.waitingList.push(game);
+            joined = true;
+            if(i == this.gameTree[this.totalRounds-1].length-1) {
+              this.loserCanPlay = false;
+              lateTeamsDiv.className = "hidden";
+            }
+          }
+        } else if(i == this.gameTree[this.totalRounds-1].length-1) {
+          this.loserCanPlay = false;
+          lateTeamsDiv.className = "hidden";
+        }
+      }
+      i++;
+    }
+    if(!joined) {
+      this.loserCanPlay = false;
     }
   }
 
@@ -305,10 +420,26 @@ var GameMaking = function() {
       } else {
         if(winner.value == 1) {
           game.team1.round++;
-          this.assignTeamToGame(game.team1);
+          if(this.totalRounds - game.team1.round < 3) {
+            this.assignTeamToNextGame(game.team1, game.game);
+          } else {
+            this.assignTeamToGame(game.team1);
+          }
+          if(this.loserCanPlay) {
+            game.team2.secondGame = true;
+            this.assignLoserToGame(game.team2);
+          }
         } else {
           game.team2.round++;
-          this.assignTeamToGame(game.team2);
+          if(this.totalRounds - game.team2.round < 3) {
+            this.assignTeamToNextGame(game.team2, game.game);
+          } else {
+            this.assignTeamToGame(game.team2);
+          }
+          if(this.loserCanPlay) {
+            game.team1.secondGame = true;
+            this.assignLoserToGame(game.team1);
+          }
         }
         var tableId = "table" + game.table.id;
         var table = document.getElementById(tableId);
@@ -324,12 +455,28 @@ var GameMaking = function() {
             tableId: game.table.id,
             team1: game.team1.name,
             team2: game.team2.name,
-            winner: winner.value
+            winner: winner.value,
+            round: game.round,
+            game: game.game
           }
           ipcRenderer.send('finishDelete', data);
         } else {
-          var g = this.startGame(game.table);
-          this.removeFromWaitinglist();
+          var g;
+          if(game.nextMatch != null) {
+            g = game.nextMatch;
+            if(g.round > 3) {
+              g.nextMatch = this.nextGame(g.table);
+            } else {
+              g.nextMatch = null;
+            }
+            if(g.nextMatch != null) {
+              //this.removeFromWaitinglist();
+            }
+            this.updateTable(g);
+          } else {
+            g = this.startGame(game.table);
+            //this.removeFromWaitinglist();
+          }
           var data = {
             finishedGame: {
               round: game.round,
@@ -344,9 +491,14 @@ var GameMaking = function() {
               game: g.game,
               tableId: g.table.id,
               team1: g.team1.name,
-              team2: g.team2.name
+              team2: g.team2.name,
+              nextMatch: g.nextMatch
             }
           };
+          if(g.round == this.totalRounds-1 && g.game == this.gameTree[this.totalRounds-1].length-1) {
+            this.loserCanPlay = false;
+            lateTeamsDiv.className = "hidden";
+          }
           ipcRenderer.send('finishGame', data);
         }
       }
@@ -413,7 +565,7 @@ var GameMaking = function() {
 
   this.createTable = function(nb) {
     var cupTable = document.createElement("div");
-    cupTable.className = "col-sm-6 cupTable";
+    cupTable.className = "col-sm-4 cupTable";
     var tableId = "table" + nb;
     cupTable.id = tableId;
     cupTable.setAttribute("round", -1);
@@ -514,6 +666,11 @@ var GameMaking = function() {
 
     tableTeams.appendChild(tableChoose);
 
+    var next = document.createElement("div");
+    next.className = "nextMatch";
+    next.innerHTML = "Next: Team1 VS Team2";
+    tableTeams.appendChild(next);
+
     cupTable.appendChild(tableTeams);
     tablesList.appendChild(cupTable);
   }
@@ -525,6 +682,17 @@ var GameMaking = function() {
     t1.innerHTML = game.team1.name;
     var t2 = table.querySelector(".team2name");
     t2.innerHTML = game.team2.name;
+
+    var next = table.querySelector(".nextMatch");
+    if(game.nextMatch != undefined || game.nextMatch != null) {
+      if(game.nextMatch.round > 3) {
+        next.className = "nextMatch";
+        next.innerHTML = "Next: " + game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
+      }
+    } else {
+      next.className = "nextMatch hidden";
+    }
+
     var button = table.querySelector(".teamWinBtn");
     button.setAttribute("round", game.round);
     button.setAttribute("game", game.game);
@@ -606,48 +774,123 @@ var GameMaking = function() {
     for(var i = 0; i < this.waitingList.length; i++) {
       var t1 = this.waitingList[i].team1;
       var t2 = this.waitingList[i].team2;
-      this.addToWaitingList(t1, t2);
+      // this.addToWaitingList(t1, t2);
       waitingList.push({ team1: t1.name, team2: t2.name });
     }
     ipcRenderer.send('waitingList', waitingList);
   };
 
-  this.addToWaitingList = function(team1, team2) {
-    var nextMatch = document.createElement("li");
-    nextMatch.className = "nextMatch";
+  // this.addToWaitingList = function(team1, team2) {
+  //   var nextMatch = document.createElement("li");
+  //   nextMatch.className = "nextMatch";
+  //
+  //   var team1div = document.createElement("div");
+  //   team1div.className = "team1";
+  //   var team1name = document.createElement("h5");
+  //   team1name.innerHTML = team1.name;
+  //   team1div.appendChild(team1name);
+  //   nextMatch.appendChild(team1div);
+  //
+  //   var vsDiv = document.createElement("div");
+  //   vsDiv.className = "vs";
+  //   var vs = document.createElement("h3");
+  //   vs.innerHTML = "VS";
+  //   vsDiv.appendChild(vs);
+  //   nextMatch.appendChild(vsDiv);
+  //
+  //   var team2div = document.createElement("div");
+  //   team2div.className = "team2";
+  //   var team2name = document.createElement("h5");
+  //   team2name.innerHTML = team2.name;
+  //   team2div.appendChild(team2name);
+  //   nextMatch.appendChild(team2div);
+  //
+  //   nextMatches.appendChild(nextMatch);
+  // };
 
-    var team1div = document.createElement("div");
-    team1div.className = "team1";
-    var team1name = document.createElement("h5");
-    team1name.innerHTML = team1.name;
-    team1div.appendChild(team1name);
-    nextMatch.appendChild(team1div);
-
-    var vsDiv = document.createElement("div");
-    vsDiv.className = "vs";
-    var vs = document.createElement("h3");
-    vs.innerHTML = "VS";
-    vsDiv.appendChild(vs);
-    nextMatch.appendChild(vsDiv);
-
-    var team2div = document.createElement("div");
-    team2div.className = "team2";
-    var team2name = document.createElement("h5");
-    team2name.innerHTML = team2.name;
-    team2div.appendChild(team2name);
-    nextMatch.appendChild(team2div);
-
-    nextMatches.appendChild(nextMatch);
-  };
-
-  this.removeFromWaitinglist = function() {
-    var obj = nextMatches.querySelector(".nextMatch:first-child");
-    obj.parentNode.removeChild(obj);
-  };
+  // this.removeFromWaitinglist = function() {
+  //   var obj = nextMatches.querySelector(".nextMatch:first-child");
+  //   obj.parentNode.removeChild(obj);
+  // };
 
   // this.showRound = function() {
   //   roundNb.innerHTML = this.round;
   // }
+
+  this.showAbsentTeams = function() {
+    for(var i = 0; i < this.absentTeams.length; i++) {
+      var id = i + 1;
+      this.showAbsentTeam(this.absentTeams[i], id);
+    }
+  }
+
+  this.showAbsentTeam = function(team, id) {
+    var lateTeam = document.createElement("li");
+
+    var idField = document.createElement("div");
+    idField.className = "idField";
+    idField.innerHTML = id;
+    lateTeam.appendChild(idField);
+
+    var teamDiv = document.createElement("div");
+    teamDiv.className = "teamNameDiv";
+    var teamName = document.createElement("span");
+    teamName.innerHTML = team.name;
+    teamDiv.appendChild(teamName);
+    lateTeam.appendChild(teamDiv);
+
+    var presentDiv = document.createElement("div");
+    presentDiv.className = "presentBox";
+    var presentLabel = document.createElement("span");
+    presentLabel.className = "checkbox";
+    // presentLabel.onclick = function() {teamPresent(this)};
+    var presentSpan = document.createElement("span");
+    presentSpan.className = "checkboxInner";
+    presentLabel.onclick = function() {
+      if(this.className == "checkbox") {
+        this.className = "checkbox checkboxChecked";
+        //Team.list[id-1].present = true;
+      } else {
+        this.className = "checkbox";
+        //Team.list[id-1].present = false;
+      }
+    }
+    // var presentCheck = document.createElement("input");
+    // presentCheck.type = "checkbox";
+    // presentCheck.className = "checkboxInput";
+    // presentSpan.appendChild(presentCheck);
+    presentLabel.appendChild(presentSpan);
+    presentDiv.appendChild(presentLabel);
+    lateTeam.appendChild(presentDiv);
+
+    var validateDiv = document.createElement("div");
+    validateDiv.className = "validateDiv";
+    var validateBtn = document.createElement("button");
+    validateBtn.className = "btn";
+    validateBtn.innerHTML = "Validate";
+    validateBtn.onclick = function() {
+      var teamLi = this.parentNode;
+      var id = teamLi.querySelector(".idField").innerHTML;
+      var checkbox = teamLi.querySelector(".checkbox");
+      if(checkbox.className == "checkbox checkboxChecked") {
+        var team = gameMaker.absentTeams[id-1];
+        lottery.teams.push(team);
+        gameMaker.assignLoserToGame(team);
+        teamLi.parentNode.removeChild(teamLi);
+        gameMaker.absentTeams.splice(id-1, 1);
+        var list = lateTeamsList.children;
+        for(var i = 0; i < list.length; i++) {
+          list[i].querySelector(".idField").innerHTML = i+1;
+        }
+        sendMessage("Equipe ajouté");
+      } else {
+        sendMessage("Marquez l'équipe comme présent pour pouvoir l'ajouter");
+      }
+    }
+    lateTeam.appendChild(validateBtn);
+
+    lateTeamsList.appendChild(lateTeam);
+  }
 };
 let gameMaker = new GameMaking();
 
@@ -867,6 +1110,7 @@ teamPresent = function(obj) {
 }
 
 showBracket = function() {
+  document.getElementById("showBracketBtn").className = "hidden";
   ipcRenderer.send('showBracket');
 }
 
@@ -1153,12 +1397,28 @@ sendMessage = function(message) {
   }, 4000);
 }
 
+toggleLateTeams = function() {
+  if(lateTeamsDiv.className == "") {
+    lateTeamsDiv.className = "lateTeamsOpen";
+  } else {
+    lateTeamsDiv.className = "";
+  }
+}
+
 toggleLottery = function() {
   if(lotteryDiv.className == "") {
     lotteryDiv.className = "lotteryOpen";
   } else {
     lotteryDiv.className = "";
   }
+}
+
+startLottery = function() {
+  lottery.prices = Price.list;
+  lottery.makeTable();
+  loadSaveLottery.className = "hidden";
+  lotteryEdit.className = "hidden";
+  lotteryPlay.className = "";
 }
 
 startGame = function() {
@@ -1172,6 +1432,8 @@ startGame = function() {
     if(Team.list[i].present) {
       gameMaker.teamsList.push(Team.list[i]);
       lottery.teams.push(Team.list[i]);
+    } else {
+      gameMaker.absentTeams.push(Team.list[i]);
     }
   }
   if(gameMaker.teamsList.length > 1) {
@@ -1182,11 +1444,8 @@ startGame = function() {
       }
       gameMaker.nbTables = nb/2;
     }
-    lottery.prices = Price.list;
-    lottery.makeTable();
-    loadSaveLottery.className = "hidden";
-    lotteryEdit.className = "hidden";
-    lotteryPlay.className = "";
+    lateTeamsDiv.className = "";
+    document.getElementById("validateLottery").className = "btn btn-block";
     gameMaker.start();
   } else {
     sendMessage("Il n'y a pas assez d'équipes présents");

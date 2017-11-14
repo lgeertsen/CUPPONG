@@ -92,7 +92,7 @@ body {
   background-color: rgba(255, 255, 255, 1);
   border: 1px solid #fff;
   border-radius: 5px;
-  box-shadow: 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12), 0 3px 5px -1px rgba(0,0,0,0.3)
+  box-shadow: 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12), 0 3px 5px -1px rgba(0,0,0,0.3);
 }
 
 .cupTable .team1,
@@ -123,6 +123,38 @@ body {
 .cupTable .tableTeams h1,
 .cupTable .tableTeams h4 {
   vertical-align: middle;
+}
+
+.cupTable .nextMatch {
+  vertical-align: middle;
+  position: relative;
+  bottom: -40px;
+  width: 100%;
+  height: 37px;
+  max-height: 37px;
+  text-align: center;
+  font-size: 24px;
+  border-top: 1px solid #D5D5D5;
+}
+
+.cupTable .nextText,
+.cupTable .nextTeams {
+  display: inline-block;
+}
+
+.cupTable .nextText {
+  width: 19.5%;
+  height: 37px;
+  border-right: 1px solid #D5D5D5;
+  font-weight: bold;
+  overflow: hidden;
+}
+
+.cupTable .nextTeams {
+  width: 79.5%;
+  height: 37px;
+  /*font-size: 18px;*/
+  overflow: hidden;
 }
 
 #waitingList {
@@ -212,25 +244,25 @@ body {
   font-size: 56px;
 }
 
-#newGame .cupTable .team1anim,
-#newGame .cupTable .team2anim {
+.team1anim,
+.team2anim {
   display: table;
   margin: auto;
 }
 
-#newGame .cupTable .tableTeams .winner {
+.winner {
   background: -webkit-linear-gradient(90deg, rgba(84, 195, 225, 0.9), rgba(107, 195, 120, 0.9));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-#newGame .cupTable .tableTeams .loser {
+.loser {
   background: -webkit-linear-gradient(90deg, rgba(238, 101, 136, 0.9), rgba(246, 149, 96, 0.9));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-#newGame .hideText {
+.hideText {
   color: transparent;
 }
 
@@ -357,11 +389,10 @@ html {
           flex: 1;
 }
 .tournament-bracket__round-title {
-  color: #9e9e9e;
-  font-size: 0.95rem;
+  color: #fff;
+  font-size: 1.5rem;
   font-weight: 400;
   text-align: center;
-  font-style: italic;
   margin-bottom: 0.5em;
 }
 .tournament-bracket__list {
@@ -526,8 +557,8 @@ html {
   display: -ms-flexbox;
   display: flex;
   width: 100%;
-  background-color: #ffffff;
-  padding: 5px;
+  /*background-color: #ffffff;*/
+  /*padding: 5px;*/
   border: 1px solid transparent;
   border-radius: 0.1em;
   /*box-shadow: 0 2px 0 0 #e5e5e5;*/
@@ -630,13 +661,21 @@ html {
   .tournament-bracket__match::after {
     width: 1.5em;
   }
-  .tournament-bracket__match::before {
-    -webkit-transform: translate(5px, 1px);
-            transform: translate(5px, 1px);
+  .tournament-bracket__match--left::before {
+    -webkit-transform: translate(1px, 1px);
+            transform: translate(1px, 1px);
   }
-  .tournament-bracket__match::after {
-    -webkit-transform: translate(0, -1px);
-            transform: translate(0, -1px);
+  .tournament-bracket__match--right::before {
+    -webkit-transform: translate(-1px, 1px);
+            transform: translate(-1px, 1px);
+  }
+  .tournament-bracket__match--left::after {
+    -webkit-transform: translate(1px, -1px);
+            transform: translate(1px, -1px);
+  }
+  .tournament-bracket__match--right::after {
+    -webkit-transform: translate(-1px, -1px);
+            transform: translate(-1px, -1px);
   }
   .tournament-bracket__round--final .tournament-bracket__match::before,
   .tournament-bracket__round--final .tournament-bracket__item::after,
@@ -646,23 +685,74 @@ html {
   }
 }
 
-.tournament-bracket__match div {
+.tournament-bracket__match .tableBox {
   display: block;
-  width: 100%;
   height: 100%;
-  text-align: center;
+  width: 100%;
 }
 
-.tournament-bracket__match .team1 {
-  margin-bottom: 0;
+.tournament-bracket__match .tableTitle {
+  display: block;
+  width: 80%;
+  height: 20%;
+  margin: auto;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 1);
+  border: 1px solid #fff;
+  border-bottom: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.tournament-bracket__match .tableTitle.hideBox {
+  background: transparent;
+  color: transparent;
+  border-color: transparent;
+}
+
+.tournament-bracket__match .tableTitle h4 {
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+}
+
+.tournament-bracket__match .table {
+  z-index: 5;
+  background-color: #fff;
+  display: block;
+  width: 100%;
+  height: 80%;
+  text-align: center;
+  padding: 7px;
+  border-radius: 2px;
+  box-shadow: 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12), 0 3px 5px -1px rgba(0,0,0,0.3)
+}
+
+.tournament-bracket__match .team1,
+.tournament-bracket__match .team2 {
+  display: table-cell;
+  vertical-align: middle;
+  width: 10%;
+  height: 35px;
+  -ms-word-break: break-all;
+      word-break: break-all;
+      word-break: break-word;
+ -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+     -ms-hyphens: auto;
+         hyphens: auto;
+}
+
+.tournament-bracket__match .team1 .team1name,
+.tournament-bracket__match .team2 .team2name {
+  text-align: center;
+  margin: 0;
+  font-weight: bold;
 }
 
 .tournament-bracket__match .vs {
-  margin: 10px 0 10px;
-}
-
-.tournament-bracket__match .team2 {
-  margin-top: 0;
+  margin: 7px 0 7px;
+  font-weight: bold;
 }
 
 .tournament-bracket__round:last-child .tournament-bracket__match::before,
@@ -679,4 +769,23 @@ html {
 .tournament-bracket__round:first-child .tournament-bracket__match::before,
 .tournament-bracket__round:first-child .tournament-bracket__match::after {
   display: none;
+}
+
+.tournament-bracket__round--final .team1,
+.tournament-bracket__round--final .vs,
+.tournament-bracket__round--final .team2 {
+  width: 39%;
+  height: 100%;
+  vertical-align: middle;
+  display: inline-block;
+  text-align: center;
+}
+
+.tournament-bracket__round--final .vs {
+  width: 19%;
+  font-size: 44px;
+}
+
+.tournament-bracket__round--final .table {
+  padding: 30px 7px;
 }

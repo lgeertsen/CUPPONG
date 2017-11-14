@@ -16,21 +16,64 @@ var roundContainer = document.getElementById("roundContainer");
 let busy = false;
 let waitingFunctionList = [];
 
+let bracketShown = false;
+let bracketWaitingList = [];
+
 var Renderer = function() {
   this.startGames = function(games) {
     for(var i = 0; i < games.length; i++) {
-      if(busy) {
-        waitingFunctionList.push({
-          function: startGame,
-          data: games[i]
-        });
+      var game = games[i];
+      if(game.round < 4) {
+        if(bracketShown) {
+          if(busy) {
+            waitingFunctionList.push({
+              function: updateBracketTable,
+              data: game
+            });
+          } else {
+            renderer.updateBracketTable(game);
+          }
+        } else {
+          bracketWaitingList.push(game);
+        }
+        var tableId = "table" + game.tableId;
+        var obj = document.getElementById(tableId);
+        if(obj) {
+          var parent = obj.parentNode;
+          parent.removeChild(obj);
+          for(var j = 0; j < roundContainer.querySelectorAll(".roundDiv").length; j++) {
+            var id = "round" + j;
+            var round = document.getElementById(id);
+            if(round.childNodes.length < 2) {
+              round.className = "row roundDiv hidden";
+            } else {
+              round.className = "row roundDiv";
+            }
+          }
+        }
       } else {
-        renderer.startGame(games[i]);
+        if(busy) {
+          waitingFunctionList.push({
+            function: startGame,
+            data: game
+          });
+        } else {
+          startGame(game);
+        }
+        renderer.updateTable(game);
       }
+      // if(busy) {
+      //   waitingFunctionList.push({
+      //     function: startGame,
+      //     data: games[i]
+      //   });
+      // } else {
+      //   renderer.startGame(games[i]);
+      // }
     }
-    for(var i = 0; i < games.length; i++) {
-      renderer.updateTable(games[i]);
-    }
+    // for(var i = 0; i < games.length; i++) {
+    //   renderer.updateTable(games[i]);
+    // }
 
     // busy = true;
     // for(var i = 0; i < games.length; i++) {
@@ -140,6 +183,51 @@ var Renderer = function() {
         }, 1500);
       }, 1500);
     }, 2000);
+  }
+
+  this.finishBracketGame = function(game) {
+    busy = true;
+    var id = 'game' + game.round + game.game;
+    var table = document.getElementById(id);
+    var team1 = table.querySelector(".team1name");
+    var team2 = table.querySelector(".team2name");
+    var tableTitle = table.querySelector(".tableTitle");
+
+    setTimeout(function() {
+      if(game.winner == 1) {
+        team1.className = "team1name animated pulse winner";
+        team2.className = "team2name animated pulse loser";
+      } else {
+        team1.className = "team1name animated pulse loser";
+        team2.className = "team2name animated pulse winner";
+      }
+      setTimeout(function() {
+        if(game.winner == 1) {
+          team2.className = "team2name animated hinge loser";
+        } else {
+          team1.className = "team1name animated hinge loser";
+        }
+        setTimeout(function() {
+          if(game.winner == 1) {
+            team1.className = "team1name animated flip winner";
+          } else {
+            team2.className = "team2name animated flip winner";
+          }
+          setTimeout(function() {
+            tableTitle.className = "tableTitle animated fadeOut";
+            if(game.winner == 1) {
+              team2.className = "team2name animated fadeIn loser";
+            } else {
+              team1.className = "team1name animated fadeIn loser";
+            }
+            setTimeout(function(){
+              tableTitle.className = "tableTitle hideBox";
+              endBusy(true);
+            }, 1000);
+          }, 1000);
+        }, 1500);
+      }, 1500);
+    }, 500);
   }
 
   this.playLottery = function(data) {
@@ -274,6 +362,18 @@ var Renderer = function() {
     team2.appendChild(team2name);
     tableTeams.appendChild(team2);
 
+    var next = document.createElement("div");
+    next.className = "nextMatch hidden";
+    var nextText = document.createElement("div");
+    nextText.className = "nextText";
+    nextText.innerHTML = "Next:";
+    next.appendChild(nextText);
+    var nextTeams = document.createElement("div");
+    nextTeams.className = "nextTeams";
+    nextTeams.innerHTML = "Team1 VS Team2";
+    next.appendChild(nextTeams);
+    tableTeams.appendChild(next);
+
     cupTable.appendChild(tableTeams);
     div.appendChild(cupTable)
     tablesList.appendChild(div);
@@ -284,8 +384,16 @@ var Renderer = function() {
     var table = document.getElementById(id);
     var team1 = table.querySelector(".team1name");
     var team2 = table.querySelector(".team2name");
+    var next = table.querySelector(".nextMatch");
+    var nextTeams = table.querySelector(".nextTeams");
     team1.innerHTML = game.team1;
     team2.innerHTML = game.team2;
+    if(game.nextMatch == null || game.nextMatch.round < 4) {
+      next.className = "nextMatch hidden";
+    } else {
+      next.className = "nextMatch";
+      nextTeams.innerHTML = game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
+    }
 
     if(table.getAttribute("round") != game.round) {
       var roundId = "round" + game.round;
@@ -314,12 +422,32 @@ var Renderer = function() {
   }
 
   this.updateBracketTable = function(game) {
+    busy = true;
     var id = "game" + game.round + game.game;
     var table = document.getElementById(id);
-    var team1 = table.querySelector(".team1");
-    var team2 = table.querySelector(".team2");
-    team1.innerHTML = game.team1;
-    team2.innerHTML = game.team2;
+    var tableTitle = table.querySelector(".tableTitle");
+    var tableText = tableTitle.querySelector("h4");
+    var team1 = table.querySelector(".team1name");
+    var vs = table.querySelector(".vs");
+    var team2 = table.querySelector(".team2name");
+
+    tableText.innerHTML = "Table " + game.tableId;
+
+    setTimeout(function() {
+      tableTitle.className = "tableTitle animated slideInUp";
+      setTimeout(function() {
+        team1.innerHTML = game.team1;
+        team1.className = "team1name animated jackInTheBox";
+        setTimeout(function() {
+          vs.className = "vs animated bounceInDown";
+          setTimeout(function() {
+            team2.innerHTML = game.team2;
+            team2.className = "team2name animated jackInTheBox";
+            endBusy(false);
+          }, 1500);
+        }, 1000);
+      }, 1500);
+    }, 1500);
   }
 
   this.createWaitinglist = function(games) {
@@ -373,15 +501,17 @@ ipcRenderer.on('createTables', (event, data) => {
   //   tables[tables.length-2].className = "col-sm-4 col-sm-offset-2 cupTableContainer";
   //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
   // }
-  splashScreen.className = "hidden";
-  newGame.className = "";
-  overview.className = "";
+  // newGame.className = "";
 });
 
 ipcRenderer.on('startGames', (event, data) => {
   // for(var i = 0; i < data.length; i++) {
   //   console.log(data[i].round);
   // }
+  overview.className = "animated fadeIn";
+  setTimeout(function() {
+    splashScreen.className = "hidden";
+  }, 3000);
   renderer.startGames(data);
 });
 
@@ -391,14 +521,35 @@ ipcRenderer.on('waitingList', (event, data) => {
 
 ipcRenderer.on('showBracket', (event) => {
   bracketsOverview.className = "animated fadeIn";
+  bracketShown = true;
   setTimeout(function() {
     overview.className = "hidden";
+    while(bracketWaitingList.length > 0) {
+      var g = bracketWaitingList.shift();
+      if(busy) {
+        waitingFunctionList.push({
+          function: updateBracketTable,
+          data: g
+        });
+      } else {
+        renderer.updateBracketTable(g);
+      }
+    }
   },1000);
 });
 
 ipcRenderer.on('finishGame', (event, data) => {
   if(data.finishedGame.round < 4) {
-
+    if(bracketShown) {
+      if(busy) {
+        waitingFunctionList.push({
+          function: finishBracketGame,
+          data: data.finishedGame
+        });
+      } else {
+        renderer.finishBracketGame(data.finishedGame);
+      }
+    }
   } else {
     if(busy) {
       waitingFunctionList.push({
@@ -410,12 +561,32 @@ ipcRenderer.on('finishGame', (event, data) => {
     }
   }
   if(data.newGame.round < 4) {
-    renderer.updateBracketTable(data.newGame);
+    if(bracketShown) {
+      if(busy) {
+        waitingFunctionList.push({
+          function: updateBracketTable,
+          data: data.newGame
+        });
+      } else {
+        renderer.updateBracketTable(data.newGame);
+      }
+    } else {
+      bracketWaitingList.push(data.newGame);
+    }
     var tableId = "table" + data.newGame.tableId;
     var obj = document.getElementById(tableId);
     if(obj) {
       var parent = obj.parentNode;
       parent.removeChild(obj);
+      for(var i = 0; i < roundContainer.querySelectorAll(".roundDiv").length; i++) {
+        var id = "round" + i;
+        var round = document.getElementById(id);
+        if(round.childNodes.length < 2) {
+          round.className = "row roundDiv hidden";
+        } else {
+          round.className = "row roundDiv";
+        }
+      }
     }
   } else {
     waitingFunctionList.push({
@@ -429,13 +600,26 @@ ipcRenderer.on('finishGame', (event, data) => {
 });
 
 ipcRenderer.on('finishDelete', (event, data) => {
-  if(busy) {
-    waitingFunctionList.push({
-      function: finishGame,
-      data: data
-    });
+  if(data.round < 4) {
+    if(bracketShown) {
+      if(busy) {
+        waitingFunctionList.push({
+          function: finishBracketGame,
+          data: data
+        });
+      } else {
+        renderer.finishBracketGame(data);
+      }
+    }
   } else {
-    finishGame(data);
+    if(busy) {
+      waitingFunctionList.push({
+        function: finishGame,
+        data: data
+      });
+    } else {
+      finishGame(data);
+    }
   }
   var tableId = "table" + data.tableId;
   var obj = document.getElementById(tableId);
@@ -506,11 +690,19 @@ function startGame(game) {
   renderer.startGame(game);
 }
 
+function updateBracketTable(game) {
+  renderer.updateBracketTable(game);
+}
+
 function finishGame(data) {
   if(newGame.className == "hidden") {
     newGame.className = "animated fadeIn";
   }
   renderer.finishGame(data);
+}
+
+function finishBracketGame(data) {
+  renderer.finishBracketGame(data);
 }
 
 function champions(data) {

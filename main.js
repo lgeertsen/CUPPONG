@@ -56,8 +56,9 @@ function createWindow () {
       skipTaskbar: true,
       icon: path.join(__dirname, 'icons/png/cupPong_128x128.png')
     })
+    mainWindow.focus();
   } else {
-    mainWindow.webContents.send('noExternalDisplay', {})
+    //mainWindow.webContents.send('noExternalDisplay', {})
     secondWindow = new BrowserWindow({
       width: width,
       height: height,
@@ -86,8 +87,8 @@ function createWindow () {
   secondWindow.setMenu(null);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
-  secondWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
+  // secondWindow.webContents.openDevTools()
 
 if (secondWindow != null) {
   ipcMain.on('createTables', (event, data) => {
