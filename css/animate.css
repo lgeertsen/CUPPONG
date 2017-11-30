@@ -9,7 +9,7 @@
  */
 
 .animated {
-  animation-duration: 1s;
+  animation-duration: 0.5s;
   animation-fill-mode: both;
 }
 
@@ -18,7 +18,7 @@
 }
 
 .animated.hinge {
-  animation-duration: 2s;
+  animation-duration: 1s;
 }
 
 .animated.flipOutX,

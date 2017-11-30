@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron');
 const {dialog} = require('electron').remote;
 var fs = require('fs');
-var convertExcel = require('excel-as-json').processFile;
+//var convertExcel = require('excel-as-json').processFile;
 
 var body = document.getElementById("body");
 body.style.height = window.innerHeight + "px";
@@ -9,15 +9,14 @@ var teamList = document.getElementById("teamList");
 teamList.style.height = (window.innerHeight * 0.85) + "px";
 var roundContainer = document.getElementById("roundContainer");
 
+var menuDiv = document.getElementById("menu");
+document.getElementById("defaultOpen").click();
+
 var lateTeamsDiv = document.getElementById("lateTeams");
-lateTeamsDiv.style.maxHeight = (window.innerHeight - 40) + "px";
 var lateTeamsList = document.getElementById("lateTeamsList");
-lateTeamsList.style.maxHeight = (window.innerHeight - 100) + "px";
 
 var lotteryDiv = document.getElementById("lottery");
-lotteryDiv.style.maxHeight = (window.innerHeight - 40) + "px";
 var priceList = document.getElementById("priceList");
-priceList.style.maxHeight = (window.innerHeight - 180) + "px";
 var loadSaveLottery = document.getElementById("loadSaveLottery");
 var lotteryEdit = document.getElementById("lotteryEdit");
 var lotteryPlay = document.getElementById("lotteryPlay");
@@ -221,6 +220,11 @@ var GameMaking = function() {
       var game = this.nextGame(this.tables[i]);
       games[i].nextMatch = game;
       gameList[i].nextMatch = game;
+    }
+    for(var i in this.tables) {
+      var game = this.nextGame(this.tables[i]);
+      games[i].nextMatch2 = game;
+      gameList[i].nextMatch2 = game;
       this.updateTable(gameList[i]);
     }
 
@@ -239,10 +243,14 @@ var GameMaking = function() {
 
   this.nextGame = function(table) {
     var game = this.waitingList.shift();
-    game.table = table;
-    if(game.round < 4) {
-      this.waitingList.unshift(game);
-      game = null;
+    if(game) {
+      game.table = table;
+      if(game.round < 4) {
+        this.waitingList.unshift(game);
+        game = null;
+      }
+    } else {
+      return;
     }
     return game;
   }
@@ -464,8 +472,18 @@ var GameMaking = function() {
           var g;
           if(game.nextMatch != null) {
             g = game.nextMatch;
-            if(g.round > 3) {
+
+            if(game.nextMatch2 != null) {
+              console.log("ma bite");
+              g.nextMatch = game.nextMatch2;
+              console.log("1 " + g.nextMatch);
+              g.nextMatch2 = this.nextGame(g.table);
+              console.log("2 " + g.nextMatch2);
+            } else if(g.round > 3) {
               g.nextMatch = this.nextGame(g.table);
+              if(g.nextMatch != null) {
+                g.nextMatch2 = this.nextGame(g.table);
+              }
             } else {
               g.nextMatch = null;
             }
@@ -492,7 +510,8 @@ var GameMaking = function() {
               tableId: g.table.id,
               team1: g.team1.name,
               team2: g.team2.name,
-              nextMatch: g.nextMatch
+              nextMatch: g.nextMatch,
+              nextMatch2: g.nextMatch2
             }
           };
           if(g.round == this.totalRounds-1 && g.game == this.gameTree[this.totalRounds-1].length-1) {
@@ -676,6 +695,7 @@ var GameMaking = function() {
   }
 
   this.updateTable = function(game) {
+    console.log(game);
     var tableId = "table" + game.table.id;
     var table = document.getElementById(tableId);
     var t1 = table.querySelector(".team1name");
@@ -688,6 +708,9 @@ var GameMaking = function() {
       if(game.nextMatch.round > 3) {
         next.className = "nextMatch";
         next.innerHTML = "Next: " + game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
+      }
+      if(game.nextMatch2 != undefined || game.nextMatch2 != null) {
+        next.innerHTML += "<br>" + game.nextMatch2.team1.name + " VS " + game.nextMatch2.team2.name;
       }
     } else {
       next.className = "nextMatch hidden";
@@ -838,6 +861,20 @@ var GameMaking = function() {
     teamName.innerHTML = team.name;
     teamDiv.appendChild(teamName);
     lateTeam.appendChild(teamDiv);
+
+    var player1Div = document.createElement("div");
+    player1Div.className = "player1Div";
+    var player1Name = document.createElement("span");
+    player1Name.innerHTML = team.player1;
+    player1Div.appendChild(player1Name);
+    lateTeam.appendChild(player1Div);
+
+    var player2Div = document.createElement("div");
+    player2Div.className = "player2Div";
+    var player2Name = document.createElement("span");
+    player2Name.innerHTML = team.player2;
+    player2Div.appendChild(player2Name);
+    lateTeam.appendChild(player2Div);
 
     var presentDiv = document.createElement("div");
     presentDiv.className = "presentBox";
@@ -1397,21 +1434,65 @@ sendMessage = function(message) {
   }, 4000);
 }
 
-toggleLateTeams = function() {
-  if(lateTeamsDiv.className == "") {
-    lateTeamsDiv.className = "lateTeamsOpen";
+toggleMenu = function() {
+  if(menuDiv.className == "") {
+    menuDiv.className = "menuOpen";
   } else {
-    lateTeamsDiv.className = "";
+    menuDiv.className = "";
   }
 }
 
-toggleLottery = function() {
-  if(lotteryDiv.className == "") {
-    lotteryDiv.className = "lotteryOpen";
-  } else {
-    lotteryDiv.className = "";
+function openTab(evt, tabName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
   }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
 }
+
+skipAnimations = function() {
+  ipcRenderer.send('skipAnimations');
+  sendMessage("Animations skipped");
+}
+
+enableAnimations = function() {
+  ipcRenderer.send('enableAnimations');
+  sendMessage("Animations enabled");
+}
+
+disableAnimations = function() {
+  ipcRenderer.send('disableAnimations');
+  sendMessage("Animations disabled");
+}
+
+// toggleLateTeams = function() {
+//   if(lateTeamsDiv.className == "") {
+//     lateTeamsDiv.className = "lateTeamsOpen";
+//   } else {
+//     lateTeamsDiv.className = "";
+//   }
+// }
+//
+// toggleLottery = function() {
+//   if(lotteryDiv.className == "") {
+//     lotteryDiv.className = "lotteryOpen";
+//   } else {
+//     lotteryDiv.className = "";
+//   }
+// }
 
 startLottery = function() {
   lottery.prices = Price.list;
@@ -1444,8 +1525,7 @@ startGame = function() {
       }
       gameMaker.nbTables = nb/2;
     }
-    lateTeamsDiv.className = "";
-    document.getElementById("validateLottery").className = "btn btn-block";
+    document.getElementById("validateLottery").className = "btn";
     gameMaker.start();
   } else {
     sendMessage("Il n'y a pas assez d'équipes présents");

@@ -12,52 +12,59 @@
 
     <div id="messageBox"></div>
 
-    <div id="lateTeams" class="hidden">
-      <div id="toggleLateTeams" onclick="toggleLateTeams()">
-        <i class="fa fa-user"></i>
+    <div id="menu" class="">
+      <div id="toggleMenu" onclick="toggleMenu()">
+        <i class="fa fa-bars"></i>
       </div>
-      <div class="lateTeamsTitle">
-        <span>LATE TEAMS</span>
-      </div>
-      <div id="lateTeamsDiv">
-        <ul id="lateTeamsList"></ul>
-      </div>
-    </div>
 
-    <div id="lottery" class="">
-      <div id="toggleLottery" onclick="toggleLottery()">
-        <i class="fa fa-random"></i>
-      </div>
-      <div class="lotteryTitle">
-        <span>LOTTERY</span>
-        <div id="loadSaveLottery">
-          <button id="saveLottery" class="btn" type="button" name="button" onclick="savePricesToFile()">Save</button>
-          <button id="loadLottery" class="btn" type="button" name="button" onclick="loadPricesFromFile()">Load</button>
+        <div class="tab">
+          <button class="tablinks" onclick="openTab(event, 'options')" id="defaultOpen">Options</button>
+          <button class="tablinks" onclick="openTab(event, 'lottery')">Lottery</button>
+          <button class="tablinks" onclick="openTab(event, 'lateTeams')">Late Teams</button>
         </div>
-      </div>
-      <div id="lotteryEdit">
-        <div class="priceInput">
-          <input type="text" id="priceName" class="form-control" name="priceName" value="" placeholder="Price">
-          <div class="input-group">
-            <input type="number" id="priceProb" class="form-control" name="priceProb" value="" placeholder="Probabilité: ex 10%">
-            <div class="input-group-addon">%</div>
+
+        <div id="options" class="tabcontent">
+          <button class="btn btn-warning" onclick="skipAnimations()">Skip animations</button>
+          <button class="btn btn-success" onclick="enableAnimations()">Enable animations</button>
+          <button class="btn btn-danger" onclick="disableAnimations()">Disable animations</button>
+        </div>
+
+        <div id="lateTeams" class="tabcontent">
+          <!-- <div class="lateTeamsTitle">
+            <span>LATE TEAMS</span>
+          </div> -->
+          <ul id="lateTeamsList"></ul>
+        </div>
+
+        <div id="lottery" class="tabcontent">
+          <div id="loadSaveLottery">
+            <button id="validateLottery" class="btn hidden" type="button" name="button" onclick="startLottery()">Start Lottery</button>
+            <button id="saveLottery" class="btn" type="button" name="button" onclick="savePricesToFile()">Save Lottery</button>
+            <button id="loadLottery" class="btn" type="button" name="button" onclick="loadPricesFromFile()">Load Lottery</button>
           </div>
-          <button id="addPrice" class="btn btn-block" type="button" name="button" onclick="addPrice()">Add price</button>
-          <button id="validateLottery" class="btn btn-block hidden" type="button" name="button" onclick="startLottery()">START</button>
+          <div id="lotteryEdit">
+            <div class="priceInput">
+              <input type="text" id="priceName" class="form-control" name="priceName" value="" placeholder="Price">
+              <div class="input-group">
+                <input type="number" id="priceProb" class="form-control" name="priceProb" value="" placeholder="Probabilité: ex 10%">
+                <span class="input-group-addon">%</span>
+              </div>
+              <button id="addPrice" class="btn btn-block" type="button" name="button" onclick="addPrice()">Add price</button>
+            </div>
+            <ul id="priceList"></ul>
+          </div>
+          <div id="lotteryPlay" class="hidden">
+            <button id="lotteryPlayBtn" class="btn" type="button" name="button" onclick="playLottery()">Start</button>
+            <div id="lotteryWin" class="hidden">
+              <h3>Price</h3>
+              <div class="animationPrice animation"></div>
+              <h3>Team</h3>
+              <div class="animationTeam animation"></div>
+              <button id="lotteryNewTeam" class="btn" type="button" name="button" onclick="lotteryNewTeam()">Get new team</button>
+              <button id="lotteryFinish" class="btn" type="button" name="button" onclick="finishLottery()">Back to game</button>
+            </div>
+          </div>
         </div>
-        <ul id="priceList"></ul>
-      </div>
-      <div id="lotteryPlay" class="hidden">
-        <button id="lotteryPlayBtn" class="btn" type="button" name="button" onclick="playLottery()">Start</button>
-        <div id="lotteryWin" class="hidden">
-          <h3>Price</h3>
-          <div class="animationPrice animation"></div>
-          <h3>Team</h3>
-          <div class="animationTeam animation"></div>
-          <button id="lotteryNewTeam" class="btn" type="button" name="button" onclick="lotteryNewTeam()">Get new team</button>
-          <button id="lotteryFinish" class="btn" type="button" name="button" onclick="finishLottery()">Back to game</button>
-        </div>
-      </div>
     </div>
 
     <div id="main" class="">
@@ -197,9 +204,12 @@
     </div>
   </body>
 
-  <!-- <script src="js/jquery.js" type="text/javascript"></script>
-  <script src="js/bootstrap.min.js" type="text/javascript"></script> -->
-  <script src="js/xlsx.full.min.js" type="text/javascript"></script>
+  <!-- <script src="js/jquery-3.2.1.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    var $ = require("jquery");
+  </script>
+  <script src="js/bootstrap.js" type="text/javascript"></script> -->
+  <!-- <script src="js/xlsx.full.min.js" type="text/javascript"></script> -->
   <script src="js/textAnimation.js" type="text/javascript"></script>
   <script src="js/app.js" type="text/javascript">
   </script>

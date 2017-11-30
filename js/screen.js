@@ -19,6 +19,8 @@ let waitingFunctionList = [];
 let bracketShown = false;
 let bracketWaitingList = [];
 
+var animations = true;
+
 var Renderer = function() {
   this.startGames = function(games) {
     for(var i = 0; i < games.length; i++) {
@@ -27,6 +29,7 @@ var Renderer = function() {
         if(bracketShown) {
           if(busy) {
             waitingFunctionList.push({
+              id: 1,
               function: updateBracketTable,
               data: game
             });
@@ -52,13 +55,15 @@ var Renderer = function() {
           }
         }
       } else {
-        if(busy) {
-          waitingFunctionList.push({
-            function: startGame,
-            data: game
-          });
-        } else {
-          startGame(game);
+        if(animations) {
+          if(busy) {
+            waitingFunctionList.push({
+              function: startGame,
+              data: game
+            });
+          } else {
+            startGame(game);
+          }
         }
         renderer.updateTable(game);
       }
@@ -125,12 +130,12 @@ var Renderer = function() {
                 setTimeout(function() {
                   cupTable.className = "cupTable hidden";
                   endBusy(true);
-                }, 1000);
-              }, 2000);
-            }, 1500);
-          }, 1000);
-        }, 1500);
-      }, 2000);
+                }, 500);
+              }, 1000);
+            }, 750);
+          }, 500);
+        }, 750);
+      }, 1000);
     // }, time);
   }
 
@@ -178,11 +183,11 @@ var Renderer = function() {
             setTimeout(function() {
               cupTable.className = "cupTable hidden";
               endBusy(true);
-            }, 1000);
-          }, 2000);
-        }, 1500);
-      }, 1500);
-    }, 2000);
+            }, 500);
+          }, 1000);
+        }, 750);
+      }, 750);
+    }, 1000);
   }
 
   this.finishBracketGame = function(game) {
@@ -223,11 +228,11 @@ var Renderer = function() {
             setTimeout(function(){
               tableTitle.className = "tableTitle hideBox";
               endBusy(true);
-            }, 1000);
-          }, 1000);
-        }, 1500);
-      }, 1500);
-    }, 500);
+            }, 500);
+          }, 500);
+        }, 750);
+      }, 750);
+    }, 250);
   }
 
   this.playLottery = function(data) {
@@ -267,7 +272,7 @@ var Renderer = function() {
     setTimeout(function() {
       lottery.className = "hidden";
       endBusy(false);
-    }, 1000);
+    }, 500);
   }
 
   this.champions = function(data) {
@@ -287,9 +292,9 @@ var Renderer = function() {
         champsTeam.className = "animated flipInY";
         setTimeout(function() {
           champsNames.className = "animated slideInUp";
-        }, 1000);
-      }, 1000);
-    }, 1000);
+        }, 500);
+      }, 500);
+    }, 500);
   }
 
   this.createRound = function(id) {
@@ -393,6 +398,10 @@ var Renderer = function() {
     } else {
       next.className = "nextMatch";
       nextTeams.innerHTML = game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
+      console.log(game.nextMatch2 != null && game.nextMatch2.round > 3);
+      if(game.nextMatch2 != null && game.nextMatch2.round > 3) {
+        nextTeams.innerHTML += "<br>" + game.nextMatch2.team1.name + " VS " + game.nextMatch2.team2.name;
+      }
     }
 
     if(table.getAttribute("round") != game.round) {
@@ -444,10 +453,10 @@ var Renderer = function() {
             team2.innerHTML = game.team2;
             team2.className = "team2name animated jackInTheBox";
             endBusy(false);
-          }, 1500);
-        }, 1000);
-      }, 1500);
-    }, 1500);
+          }, 750);
+        }, 500);
+      }, 750);
+    }, 750);
   }
 
   this.createWaitinglist = function(games) {
@@ -511,7 +520,7 @@ ipcRenderer.on('startGames', (event, data) => {
   overview.className = "animated fadeIn";
   setTimeout(function() {
     splashScreen.className = "hidden";
-  }, 3000);
+  }, 1500);
   renderer.startGames(data);
 });
 
@@ -528,6 +537,7 @@ ipcRenderer.on('showBracket', (event) => {
       var g = bracketWaitingList.shift();
       if(busy) {
         waitingFunctionList.push({
+          id: 1,
           function: updateBracketTable,
           data: g
         });
@@ -535,7 +545,7 @@ ipcRenderer.on('showBracket', (event) => {
         renderer.updateBracketTable(g);
       }
     }
-  },1000);
+  }, 500);
 });
 
 ipcRenderer.on('finishGame', (event, data) => {
@@ -543,6 +553,7 @@ ipcRenderer.on('finishGame', (event, data) => {
     if(bracketShown) {
       if(busy) {
         waitingFunctionList.push({
+          id: 1,
           function: finishBracketGame,
           data: data.finishedGame
         });
@@ -551,19 +562,22 @@ ipcRenderer.on('finishGame', (event, data) => {
       }
     }
   } else {
-    if(busy) {
-      waitingFunctionList.push({
-        function: finishGame,
-        data: data.finishedGame
-      });
-    } else {
-      finishGame(data.finishedGame);
+    if(animations) {
+      if(busy) {
+        waitingFunctionList.push({
+          function: finishGame,
+          data: data.finishedGame
+        });
+      } else {
+        finishGame(data.finishedGame);
+      }
     }
   }
   if(data.newGame.round < 4) {
     if(bracketShown) {
       if(busy) {
         waitingFunctionList.push({
+          id: 1,
           function: updateBracketTable,
           data: data.newGame
         });
@@ -589,10 +603,12 @@ ipcRenderer.on('finishGame', (event, data) => {
       }
     }
   } else {
-    waitingFunctionList.push({
-      function: startGame,
-      data: data.newGame
-    });
+    if(animations) {
+      waitingFunctionList.push({
+        function: startGame,
+        data: data.newGame
+      });
+    }
     setTimeout(function() {
       renderer.updateTable(data.newGame);
     });
@@ -604,6 +620,7 @@ ipcRenderer.on('finishDelete', (event, data) => {
     if(bracketShown) {
       if(busy) {
         waitingFunctionList.push({
+          id: 1,
           function: finishBracketGame,
           data: data
         });
@@ -612,13 +629,15 @@ ipcRenderer.on('finishDelete', (event, data) => {
       }
     }
   } else {
-    if(busy) {
-      waitingFunctionList.push({
-        function: finishGame,
-        data: data
-      });
-    } else {
-      finishGame(data);
+    if(animations) {
+      if(busy) {
+        waitingFunctionList.push({
+          function: finishGame,
+          data: data
+        });
+      } else {
+        finishGame(data);
+      }
     }
   }
   var tableId = "table" + data.tableId;
@@ -641,7 +660,7 @@ ipcRenderer.on('finishDelete', (event, data) => {
       //   tables[tables.length-2].className = "col-sm-4 col-sm-offset-2 cupTableContainer";
       //   tables[tables.length-1].className = "col-sm-4 cupTableContainer";
       // }
-    }, 1000);
+    }, 500);
   }
 });
 
@@ -681,6 +700,33 @@ ipcRenderer.on('lotteryNewTeam', (event, data) => {
 
 ipcRenderer.on('finishLottery', (event) => {
   renderer.finishLottery();
+});
+
+ipcRenderer.on('skipAnimations', (event) => {
+  var i = 0;
+  while(i < waitingFunctionList.length) {
+    if(waitingFunctionList[i].id != 1) {
+      waitingFunctionList.splice(i, 1);
+    } else {
+      i++;
+    }
+  }
+});
+
+ipcRenderer.on('enableAnimations', (event) => {
+  animations = true;
+});
+
+ipcRenderer.on('disableAnimations', (event) => {
+  animations = false;
+  var i = 0;
+  while(i < waitingFunctionList.length) {
+    if(waitingFunctionList[i].id != 1) {
+      waitingFunctionList.splice(i, 1);
+    } else {
+      i++;
+    }
+  }
 });
 
 function startGame(game) {
@@ -726,7 +772,7 @@ function endBusy(fade) {
     newGame.className = "animated fadeOut";
     setTimeout(function(){
       newGame.className = "hidden";
-    }, 1000);
+    }, 500);
   } else {
     newGame.className = "hidden";
   }

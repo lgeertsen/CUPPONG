@@ -60,14 +60,13 @@ body {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
-#lateTeams,
-#lottery {
+#menu {
   z-index: 5;
   position: fixed;
-  top: 20px;
-  right: -500px;
-  width: 500px;
-  min-height: 300px;
+  top: 0;
+  right: -800px;
+  width: 800px;
+  height: 100%;
   background-color: #fff;
   box-shadow: 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12), 0 3px 5px -1px rgba(0,0,0,0.3);
   -moz-transition: all ease 1s;
@@ -75,15 +74,10 @@ body {
       -o-transition: all ease 1s;
       transition: all ease 1s;
 }
-#lateTeams {
-  z-index: 6;
-}
-#lateTeams.lateTeamsOpen,
-#lottery.lotteryOpen {
+#menu.menuOpen {
   right: 0;
 }
-#lateTeams #toggleLateTeams,
-#lottery #toggleLottery {
+#menu #toggleMenu {
   position: absolute;
   top: 10px;
   left: -45px;
@@ -93,51 +87,68 @@ body {
   background-color:rgba(84, 195, 225, 0.9);
   cursor: pointer;
 }
-#lateTeams #toggleLateTeams {
-  padding-left: 3px;
-  top: 60px;
-}
-#lateTeams #toggleLateTeams .fa,
-#lottery #toggleLottery .fa {
+#menu #toggleMenu .fa {
   color: #fff;
   font-size: 32px;
-  margin: 9px 7px;
+  margin: 7px 8px;
 }
-#lateTeams .lateTeamsTitle,
-#lottery .lotteryTitle {
-  padding-top: 10px;
-  height: 55px;
-  background-image: linear-gradient(90deg, rgba(84, 195, 225, 0.9), rgba(107, 195, 120, 0.9));
-  color: #fff;
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
+
+/* Style the tab */
+div.tab {
+  height: 50px;
+  display: flex;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+div.tab button {
+  flex: 1;
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+div.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+div.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  max-height: calc(100% - 50px);
+  display: none;
+  padding: 6px 0;
+  overflow-y: auto;
 }
 #lottery #loadSaveLottery {
-  position: absolute;
-  right: 5px;
-  top: 8px;
+  display: flex;
 }
 #lottery #loadSaveLottery .btn {
-  border: 2px solid #fff;
-  background-color: transparent;
-  color: #fff;
-  -webkit-transition: background-color 1s; /* Safari */
-  transition: background-color 1s;
+  flex: 1;
+  margin: 7px;
 }
-#lottery #loadSaveLottery .btn:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-#lottery .priceInput .form-control {
-  border-radius: 0;
-  display: inline-block;
-}
-#lottery #priceName {
-  width: 65%;
+#lottery .priceInput {
+  display: flex;
 }
 #lottery .priceInput .input-group {
-  float: right;
-  width: 35%;
+  max-width: 30%;
+}
+#lottery .priceInput #priceName,
+#lottery .priceInput .input-group,
+#lottery .priceInput #addPrice {
+  flex: 1;
+  margin: 7px;
 }
 #lottery .form-control:focus {
   border-color: rgb(84, 195, 225);
@@ -146,15 +157,9 @@ body {
 #lottery .priceInput .input-group-addon {
   border-radius: 0;
 }
-#lottery #addPrice,
-#lottery #validateLottery {
-  font-size: 16px;
-  text-transform: uppercase;
-  border-radius: 0;
-}
 #lateTeams #lateTeamsList .btn,
 #lottery #addPrice,
-#lottery #validateLottery,
+#lottery #loadSaveLottery .btn,
 #lottery #priceList .price .btn,
 #lottery #lotteryPlay .btn {
   background-color: transparent;
@@ -164,47 +169,42 @@ body {
 }
 #lateTeams #lateTeamsList .btn:hover,
 #lottery #addPrice:hover,
-#lottery #validateLottery:hover,
+#lottery #loadSaveLottery .btn:hover,
 #lottery #priceList .price .btn:hover,
 #lottery #lotteryPlay .btn:hover {
   background-color: rgba(84, 195, 225, 0.4);
 }
 #lateTeams #lateTeamsList,
 #lottery #priceList {
-  position: relative;
-  overflow-y: auto;
   list-style: none;
   padding: 0;
 }
 #lateTeamsList li,
 #lottery #priceList .price {
+  display: flex;
   padding: 5px 10px;
   border-bottom: 1px solid #b5b5b5;
 }
 #lateTeams #lateTeamsList .idField,
 #lateTeams #lateTeamsList .teamNameDiv,
+#lateTeams #lateTeamsList .player1Div,
+#lateTeams #lateTeamsList .player2Div,
 #lateTeams #lateTeamsList .presentBox,
 #lateTeams #lateTeamsList .validateDiv,
 #lottery #priceList .price .priceName,
 #lottery #priceList .price .priceProb,
 #lottery #priceList .price .btnDiv {
+  flex: 1;
   height: 36px;
   display: inline-block;
   vertical-align: middle;
   padding: 0 5px;
 }
-#lateTeams #lateTeamsList .idField {
-  width: 50px;
-  font-weight: bold;
-}
-#lateTeams #lateTeamsList .teamNameDiv {
-  width: 250px;
-}
-#lateTeams #lateTeamsList .presentBox {
-  width: 90px;
-}
+#lateTeams #lateTeamsList .teamNameDiv,
+#lateTeams #lateTeamsList .player1Div,
+#lateTeams #lateTeamsList .player2Div,
 #lateTeams #lateTeamsList .validateDiv {
-  width: 90px;
+  flex: 2;
 }
 #lottery #priceList .price .priceName {
   width: 220px;
@@ -635,17 +635,16 @@ body {
   width: 100%;
   border-top: 1px solid #D5D5D5;
   text-align: center;
-
 }
 
-#menu {
+/*#menu {
   position: absolute;
   top: 0;
   right: 0;
   padding: 0;
   height: 100%;
   background-color: #eee;
-}
+}*/
 
 #waitingList {
   width: 100%;

@@ -87,8 +87,8 @@ function createWindow () {
   secondWindow.setMenu(null);
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
-  // secondWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
+  secondWindow.webContents.openDevTools()
 
 if (secondWindow != null) {
   ipcMain.on('createTables', (event, data) => {
@@ -129,6 +129,18 @@ if (secondWindow != null) {
 
   ipcMain.on('champions', (event, data) => {
     secondWindow.webContents.send('champions', data)
+  })
+
+  ipcMain.on('skipAnimations', (event) => {
+    secondWindow.webContents.send('skipAnimations')
+  })
+
+  ipcMain.on('enableAnimations', (event) => {
+    secondWindow.webContents.send('enableAnimations')
+  })
+
+  ipcMain.on('disableAnimations', (event) => {
+    secondWindow.webContents.send('disableAnimations')
   })
 }
 

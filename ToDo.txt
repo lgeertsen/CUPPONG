@@ -1,3 +1,11 @@
-ARBRE 1/16 finale
-nb licence
-ajouter absences
+X	Il y a écrit ¼ à la place de 1/8 dans le Tableau à branches a droite
+-	Afficher tous les numeros des equipes dès que possible dans le tableau et pas seulement une fois que le match est annoncé
+-	Pouvoir reporter un match
+-	Importer les données avec un excel
+-	Exporter les données sous excel
+-	Option pour ne pas faire rejouer les perdants
+X	Accélérer les animations écrans + option pour les passer manuellement
+-	Ajouter une deuxième ligne des matchs à venir
+-	Sécurité pour sauvegarder le tournoi en cours de route, au cas où il y ait un bug ou une coupure durant la soirée
+-	Pouvoir modifier un score si erreur de saisie
+-	Pouvoir voir l’historique des matchs et des résultats durant le tournois
