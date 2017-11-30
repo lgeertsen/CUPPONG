@@ -366,8 +366,7 @@ div.tab button.active {
   width: 100%;
 }
 #teamTable .btn,
-#teamInput .btn,
-#showBracketBtn {
+#teamInput .btn {
   background-color: transparent;
   border: 2px solid rgb(238, 101, 136);
   color: rgb(238, 101, 136);
@@ -375,8 +374,7 @@ div.tab button.active {
   transition: background-color 300ms;
 }
 #teamTable .btn:hover,
-#teamInput .btn:hover,
-#showBracketBtn:hover {
+#teamInput .btn:hover {
   background-color: rgb(238, 101, 136);
   color: #fff !important;
 }
@@ -499,14 +497,6 @@ div.tab button.active {
 /*#teamTable tbody {
   overflow-y: scroll;
 }*/
-
-#overview #showBracketBtn {
-  z-index: 3;
-  position: fixed;
-  top: 5px;
-  left: 5px;
-  width: 200px;
-}
 
 #overview #tablesListDiv {
   padding: 0;

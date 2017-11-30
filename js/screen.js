@@ -548,6 +548,15 @@ ipcRenderer.on('showBracket', (event) => {
   }, 500);
 });
 
+ipcRenderer.on('hideBracket', (event) => {
+  overview.className = "";
+  bracketsOverview.className = "animated fadeOut";
+  bracketShown = false;
+  setTimeout(function() {
+    bracketsOverview.className = "hidden";
+  }, 500);
+});
+
 ipcRenderer.on('finishGame', (event, data) => {
   if(data.finishedGame.round < 4) {
     if(bracketShown) {

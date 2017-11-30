@@ -21,12 +21,15 @@
           <button class="tablinks" onclick="openTab(event, 'options')" id="defaultOpen">Options</button>
           <button class="tablinks" onclick="openTab(event, 'lottery')">Lottery</button>
           <button class="tablinks" onclick="openTab(event, 'lateTeams')">Late Teams</button>
+          <button class="tablinks" onclick="openTab(event, 'history')">History</button>
         </div>
 
         <div id="options" class="tabcontent">
           <button class="btn btn-warning" onclick="skipAnimations()">Skip animations</button>
           <button class="btn btn-success" onclick="enableAnimations()">Enable animations</button>
           <button class="btn btn-danger" onclick="disableAnimations()">Disable animations</button>
+          <button id="showBracketBtn" class="btn btn-success" type="button" name="button" onclick="showBracket()">Show bracket</button>
+          <button id="hideBracketBtn" class="btn btn-danger" type="button" name="button" onclick="hideBracket()">Hide Bracket</button>
         </div>
 
         <div id="lateTeams" class="tabcontent">
@@ -64,6 +67,10 @@
               <button id="lotteryFinish" class="btn" type="button" name="button" onclick="finishLottery()">Back to game</button>
             </div>
           </div>
+        </div>
+
+        <div id="history" class="tabcontent">
+          <ul id="historyList"></ul>
         </div>
     </div>
 
@@ -111,7 +118,6 @@
       </div>
     </div>
     <div id="overview" class="hidden">
-      <button id="showBracketBtn" class="btn" type="button" name="button" onclick="showBracket()">Montrer arbre</button>
       <div class="container-fluid">
         <div class="rows">
           <div id="tablesListDiv" class="col-sm-12">

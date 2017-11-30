@@ -23,6 +23,8 @@ var lotteryPlay = document.getElementById("lotteryPlay");
 var lotteryPlayBtn = document.getElementById("lotteryPlayBtn");
 var lotteryWin = document.getElementById("lotteryWin");
 
+var historyDiv = document.getElementById("historyList");
+
 var main = document.getElementById("main");
 
 var overview = document.getElementById("overview");
@@ -425,7 +427,12 @@ var GameMaking = function() {
           winner: winner.value
         };
         ipcRenderer.send('champions', data);
+
+        this.addToHistory(game, winner.value);
+
       } else {
+        this.addToHistory(game, winner.value);
+
         if(winner.value == 1) {
           game.team1.round++;
           if(this.totalRounds - game.team1.round < 3) {
@@ -474,11 +481,8 @@ var GameMaking = function() {
             g = game.nextMatch;
 
             if(game.nextMatch2 != null) {
-              console.log("ma bite");
               g.nextMatch = game.nextMatch2;
-              console.log("1 " + g.nextMatch);
               g.nextMatch2 = this.nextGame(g.table);
-              console.log("2 " + g.nextMatch2);
             } else if(g.round > 3) {
               g.nextMatch = this.nextGame(g.table);
               if(g.nextMatch != null) {
@@ -695,7 +699,6 @@ var GameMaking = function() {
   }
 
   this.updateTable = function(game) {
-    console.log(game);
     var tableId = "table" + game.table.id;
     var table = document.getElementById(tableId);
     var t1 = table.querySelector(".team1name");
@@ -928,6 +931,43 @@ var GameMaking = function() {
 
     lateTeamsList.appendChild(lateTeam);
   }
+
+  this.addToHistory = function(game, winner) {
+    var li = document.createElement("li");
+
+    var team1Div = document.createElement("div");
+    team1Div.className = "team1name";
+    var team1name = document.createElement("h4");
+    team1name.innerHTML = game.team1.name;
+    if(winner == 1) {
+      team1name.className = "winner";
+    } else {
+      team1name.className = "loser";
+    }
+    team1Div.appendChild(team1name);
+    li.appendChild(team1Div);
+
+    var vsDiv = document.createElement("div");
+    vsDiv.className = "vs";
+    var vs = document.createElement("h2");
+    vs.innerHTML = "VS";
+    vsDiv.appendChild(vs);
+    li.appendChild(vsDiv);
+
+    var team2Div = document.createElement("div");
+    team2Div.className = "team2name";
+    var team2name = document.createElement("h4");
+    team2name.innerHTML = game.team2.name;
+    if(winner == 2) {
+      team2name.className = "winner";
+    } else {
+      team2name.className = "loser";
+    }
+    team2Div.appendChild(team2name);
+    li.appendChild(team2Div);
+
+    historyDiv.appendChild(li);
+  }
 };
 let gameMaker = new GameMaking();
 
@@ -1147,8 +1187,12 @@ teamPresent = function(obj) {
 }
 
 showBracket = function() {
-  document.getElementById("showBracketBtn").className = "hidden";
+  // document.getElementById("showBracketBtn").className = "hidden";
   ipcRenderer.send('showBracket');
+}
+
+hideBracket = function() {
+  ipcRenderer.send('hideBracket');
 }
 
 addPrice = function() {
@@ -1295,7 +1339,6 @@ saveTeamsToFile = function() {
   dialog.showSaveDialog({ defaultPath: '/teams.cupPong',
     filters: [{ name: 'Cup Pong Teams', extensions: ['cupPong'] }]}, (fileName) => {
       if (fileName === undefined){
-          // console.log("You didn't save the file");
           return;
       }
       var obj = { teams: Team.list };
@@ -1312,7 +1355,6 @@ savePricesToFile = function() {
   dialog.showSaveDialog({ defaultPath: '/prices.cupPongPrice',
     filters: [{ name: 'Cup Pong Prices', extensions: ['cupPongPrice'] }]}, (fileName) => {
       if (fileName === undefined){
-          // console.log("You didn't save the file");
           return;
       }
       var obj = { teams: Price.list };
@@ -1332,7 +1374,6 @@ loadTeamsFromFile = function() {
    ]}, (fileNames) => {
     // fileNames is an array that contains all the selected
     if(fileNames === undefined){
-        // console.log("No file selected");
         return;
     }
     var fileName = fileNames[0];
@@ -1341,9 +1382,7 @@ loadTeamsFromFile = function() {
             alert("An error ocurred reading the file :" + err.message);
             return;
         }
-        // console.log("The file content is : " + data);
         var obj = JSON.parse(data);
-        // console.log(obj);
         Team.list = [];
         teamList.innerHTML = "";
         for(var i = 0; i < obj.teams.length; i++) {
@@ -1360,7 +1399,6 @@ loadTeamsFromExcel = function() {
    ]}, (fileNames) => {
     // fileNames is an array that contains all the selected
     if(fileNames === undefined){
-        // console.log("No file selected");
         return;
     }
     var fileName = fileNames[0];
@@ -1369,9 +1407,7 @@ loadTeamsFromExcel = function() {
     //         alert("An error ocurred reading the file :" + err.message);
     //         return;
     //     }
-    //     // console.log("The file content is : " + data);
     //     var obj = JSON.parse(data);
-    //     // console.log(obj);
     //     Team.list = [];
     //     teamList.innerHTML = "";
     //     for(var i = 0; i < obj.teams.length; i++) {
@@ -1381,7 +1417,6 @@ loadTeamsFromExcel = function() {
     //     }
     // });
 
-    //console.log(XLSX.utils.sheet_to_html(fileName));
   });
 }
 loadPricesFromFile = function() {
@@ -1390,7 +1425,6 @@ loadPricesFromFile = function() {
    ]}, (fileNames) => {
     // fileNames is an array that contains all the selected
     if(fileNames === undefined){
-        // console.log("No file selected");
         return;
     }
     var fileName = fileNames[0];
@@ -1399,9 +1433,7 @@ loadPricesFromFile = function() {
             alert("An error ocurred reading the file :" + err.message);
             return;
         }
-        // console.log("The file content is : " + data);
         var obj = JSON.parse(data);
-        // console.log(obj);
         Price.list = [];
         priceList.innerHTML = "";
         for(var i = 0; i < obj.teams.length; i++) {

@@ -107,6 +107,10 @@ if (secondWindow != null) {
     secondWindow.webContents.send('showBracket')
   })
 
+  ipcMain.on('hideBracket', (event) => {
+    secondWindow.webContents.send('hideBracket')
+  })
+
   ipcMain.on('finishGame', (event, data) => {
     secondWindow.webContents.send('finishGame', data)
   })
