@@ -175,12 +175,14 @@ div.tab button.active {
   background-color: rgba(84, 195, 225, 0.4);
 }
 #lateTeams #lateTeamsList,
-#lottery #priceList {
+#lottery #priceList,
+#history #historyList {
   list-style: none;
   padding: 0;
 }
 #lateTeamsList li,
-#lottery #priceList .price {
+#lottery #priceList .price,
+#historyList li {
   display: flex;
   padding: 5px 10px;
   border-bottom: 1px solid #b5b5b5;
@@ -193,7 +195,8 @@ div.tab button.active {
 #lateTeams #lateTeamsList .validateDiv,
 #lottery #priceList .price .priceName,
 #lottery #priceList .price .priceProb,
-#lottery #priceList .price .btnDiv {
+#lottery #priceList .price .btnDiv,
+#historyList div {
   flex: 1;
   height: 36px;
   display: inline-block;
@@ -233,6 +236,24 @@ div.tab button.active {
 #lottery #lotteryPlay .animation {
   height: 50px;
   font-size: 28px;
+}
+#historyList h2 {
+  margin: 0;
+}
+#historyList h4 {
+  margin: 8px 0;
+}
+
+.winner {
+  background: -webkit-linear-gradient(90deg, rgba(84, 195, 225, 0.9), rgba(107, 195, 120, 0.9));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.loser {
+  background: -webkit-linear-gradient(90deg, rgba(238, 101, 136, 0.9), rgba(246, 149, 96, 0.9));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 #teamInput {
