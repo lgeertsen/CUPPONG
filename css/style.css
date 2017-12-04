@@ -3,6 +3,16 @@
     src: url('../fonts/Dosis/Dosis-Regular.ttf');
 }
 
+::-moz-selection { /* Code for Firefox */
+    color: #fff;
+    background: rgb(238, 101, 136);
+}
+
+::selection {
+    color: #fff;
+    background: rgb(238, 101, 136);
+}
+
 body {
   position: fixed;
   top: 0;
@@ -10,6 +20,31 @@ body {
   width: 100%;
   font-family: 'Dosis', sans-serif;
   overflow: hidden;
+}
+
+.btn {
+  background-color: transparent;
+  border: 2px solid;
+  -webkit-transition: background-color 1s; /* Safari */
+  transition: background-color 1s;
+}
+.btn.red {
+  border-color: rgb(238, 101, 136);
+}
+.btn.orange {
+  border-color: rgb(246, 149, 96);
+}
+.btn.green {
+  border-color: rgb(107, 195, 120);
+}
+.btn.red:hover {
+  background-color: rgba(238, 101, 136, 0.4);
+}
+.btn.orange:hover {
+  background-color: rgba(246, 149, 96, 0.4);
+}
+.btn.green:hover {
+  background-color: rgba(107, 195, 120, 0.4);
 }
 
 #messageBox {
@@ -140,28 +175,6 @@ div.tab button.active {
 #options .buttonDiv button {
   flex: 1;
   margin: 0 7px;
-  background-color: transparent;
-  border: 2px solid;
-  -webkit-transition: background-color 1s; /* Safari */
-  transition: background-color 1s;
-}
-#options .buttonDiv .red {
-  border-color: rgb(238, 101, 136);
-}
-#options .buttonDiv .orange {
-  border-color: rgb(246, 149, 96);
-}
-#options .buttonDiv .green {
-  border-color: rgb(107, 195, 120);
-}
-#options .buttonDiv .red:hover {
-  background-color: rgba(238, 101, 136, 0.4);
-}
-#options .buttonDiv .orange:hover {
-  background-color: rgba(246, 149, 96, 0.4);
-}
-#options .buttonDiv .green:hover {
-  background-color: rgba(107, 195, 120, 0.4);
 }
 #lottery #loadSaveLottery {
   display: flex;

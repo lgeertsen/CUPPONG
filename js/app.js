@@ -978,6 +978,16 @@ var GameMaking = function() {
     team2Div.appendChild(team2name);
     li.appendChild(team2Div);
 
+    var btnDiv = document.createElement("div");
+    var correctBtn = document.createElement("button");
+    correctBtn.className = "btn red";
+    correctBtn.innerHTML = "Change winner";
+    correctBtn.onclick = function() {
+      console.log("correct");
+    }
+    btnDiv.appendChild(correctBtn);
+    li.appendChild(btnDiv);
+
     //historyDiv.appendChild(li);
     historyDiv.insertBefore(li, historyDiv.childNodes[0]);
   }
