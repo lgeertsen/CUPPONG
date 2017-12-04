@@ -131,6 +131,38 @@ div.tab button.active {
   padding: 6px 0;
   overflow-y: auto;
 }
+#options {
+  padding: 10px 20px;
+}
+#options .buttonDiv {
+  display: flex;
+}
+#options .buttonDiv button {
+  flex: 1;
+  margin: 0 7px;
+  background-color: transparent;
+  border: 2px solid;
+  -webkit-transition: background-color 1s; /* Safari */
+  transition: background-color 1s;
+}
+#options .buttonDiv .red {
+  border-color: rgb(238, 101, 136);
+}
+#options .buttonDiv .orange {
+  border-color: rgb(246, 149, 96);
+}
+#options .buttonDiv .green {
+  border-color: rgb(107, 195, 120);
+}
+#options .buttonDiv .red:hover {
+  background-color: rgba(238, 101, 136, 0.4);
+}
+#options .buttonDiv .orange:hover {
+  background-color: rgba(246, 149, 96, 0.4);
+}
+#options .buttonDiv .green:hover {
+  background-color: rgba(107, 195, 120, 0.4);
+}
 #lottery #loadSaveLottery {
   display: flex;
 }
@@ -237,6 +269,10 @@ div.tab button.active {
   height: 50px;
   font-size: 28px;
 }
+#historyList h2,
+#historyList h4 {
+  font-weight: bold;
+}
 #historyList h2 {
   margin: 0;
 }
@@ -297,9 +333,7 @@ div.tab button.active {
   text-align: center;
 }
 
-#sidebar #saveTeams,
-#sidebar #loadTeams,
-#sidebar #loadTeamsExcel {
+#sidebar .btn {
   display: block;
   margin: 10px 0;
   margin-left: 10%;
@@ -311,9 +345,7 @@ div.tab button.active {
   transition: background-color 1s;
 }
 
-#sidebar #saveTeams:hover,
-#sidebar #loadTeams:hover,
-#sidebar #loadTeamsExcel:hover {
+#sidebar .btn:hover {
   background-color: rgba(255,255,255,0.3);
 }
 

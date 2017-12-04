@@ -1,6 +1,7 @@
 const { ipcRenderer } = require('electron');
 const {dialog} = require('electron').remote;
-var fs = require('fs');
+const fs = require('fs');
+const XLSX = require('xlsx');
 //var convertExcel = require('excel-as-json').processFile;
 
 var body = document.getElementById("body");
@@ -935,6 +936,17 @@ var GameMaking = function() {
   this.addToHistory = function(game, winner) {
     var li = document.createElement("li");
 
+    var roundDiv = document.createElement("div");
+    var round = document.createElement("h4");
+    if(game.round == 0) {
+      round.innerHTML = "Finale";
+    } else {
+      var x = Math.pow(2, game.round);
+      round.innerHTML = "1/" + x + " finale";
+    }
+    roundDiv.appendChild(round);
+    li.appendChild(roundDiv);
+
     var team1Div = document.createElement("div");
     team1Div.className = "team1name";
     var team1name = document.createElement("h4");
@@ -966,7 +978,8 @@ var GameMaking = function() {
     team2Div.appendChild(team2name);
     li.appendChild(team2Div);
 
-    historyDiv.appendChild(li);
+    //historyDiv.appendChild(li);
+    historyDiv.insertBefore(li, historyDiv.childNodes[0]);
   }
 };
 let gameMaker = new GameMaking();
@@ -1016,7 +1029,11 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Lice
   p1Span.className = "p1Span";
   p1.appendChild(p1Span);
   var p1LicenceSpan = document.createElement("h6");
-  p1LicenceSpan.innerHTML = player1Licence;
+  if(player1Licence == undefined) {
+    p1LicenceSpan.innerHTML = "";
+  } else {
+    p1LicenceSpan.innerHTML = player1Licence;
+  }
   p1LicenceSpan.className = "p1LicenceSpan";
   p1.appendChild(p1LicenceSpan);
   var p1Edit = document.createElement("input");
@@ -1024,7 +1041,11 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Lice
   p1Edit.className = "p1Edit form-control hidden";
   p1.appendChild(p1Edit);
   var p1LicenceEdit = document.createElement("input");
-  p1LicenceEdit.value = player1Licence;
+  if(player1Licence == undefined) {
+    p1LicenceEdit.value = "";
+  } else {
+    p1LicenceEdit.value = player1Licence;
+  }
   p1LicenceEdit.className = "p1LicenceEdit form-control hidden";
   p1.appendChild(p1LicenceEdit);
   tr.appendChild(p1);
@@ -1036,7 +1057,11 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Lice
   p2Span.className = "p2Span";
   p2.appendChild(p2Span);
   var p2LicenceSpan = document.createElement("h6");
-  p2LicenceSpan.innerHTML = player2Licence;
+  if(player2Licence == undefined) {
+    p2LicenceSpan.innerHTML = "";
+  } else {
+    p2LicenceSpan.innerHTML = player2Licence;
+  }
   p2LicenceSpan.className = "p2LicenceSpan";
   p2.appendChild(p2LicenceSpan);
   var p2Edit = document.createElement("input");
@@ -1044,7 +1069,11 @@ addTeamToList = function(teamid, teamName, player1Name, player2Name, player1Lice
   p2Edit.className = "p2Edit form-control hidden";
   p2.appendChild(p2Edit);
   var p2LicenceEdit = document.createElement("input");
-  p2LicenceEdit.value = player2Licence;
+  if(player2Licence == undefined) {
+    p2LicenceEdit.value = "";
+  } else {
+    p2LicenceEdit.value = player2Licence;
+  }
   p2LicenceEdit.className = "p2LicenceEdit form-control hidden";
   p2.appendChild(p2LicenceEdit);
   tr.appendChild(p2);
@@ -1393,6 +1422,46 @@ loadTeamsFromFile = function() {
     });
   });
 }
+
+saveTeamsToExcel = function() {
+  dialog.showSaveDialog({ defaultPath: '/teams.xlsx',
+    filters: [{ name: 'Excel', extensions: ['xlsx'] }]}, (fileName) => {
+      if (fileName === undefined){
+          return;
+      }
+      var workbook;
+      if(process.platform == 'darwin') {
+        workbook = XLSX.readFile('./Contents/cupPongTeams.xlsx', {cellStyles: true});
+      } else {
+        workbook = XLSX.readFile('./cupPongTeams.xlsx', {cellStyles: true});
+      }
+      var result = {};
+      //workbook.SheetNames.forEach(function(sheetName) {
+      var roa = XLSX.utils.sheet_to_json(workbook.Sheets['Listing'], {header:1});
+      if(roa.length) {
+        result['Listing'] = roa;
+      }
+
+      for(var i = 0; i < Team.list.length; i++) {
+        var t = Team.list[i];
+        result.Listing[i+5][0] = i+1;
+        result.Listing[i+5][1] = t.name;
+        result.Listing[i+5][2] = t.name;
+        result.Listing[i+5][3] = t.player1;
+        result.Listing[i+5][4] = t.player1Licence;
+        result.Listing[i+5][5] = t.player2;
+        result.Listing[i+5][6] = t.player2Licence;
+      }
+
+      var ws = XLSX.utils.aoa_to_sheet(result.Listing);
+      var wb = { Sheets: { 'Listing': ws }, SheetNames: ['Listing'] };
+      XLSX.writeFile(wb, fileName);
+      // this.saveAsExcelFile(excelBuffer, excelFileName);
+      //
+      // var ws = XLSX.utils.json_to_sheet(result.Listing, {header:1});
+      // XLSX.writeFile(ws, 'out.xlsb');
+  });
+}
 loadTeamsFromExcel = function() {
   dialog.showOpenDialog({ filters: [
      { name: 'Excel (.xlsx)', extensions: ['xlsx'] }
@@ -1402,19 +1471,38 @@ loadTeamsFromExcel = function() {
         return;
     }
     var fileName = fileNames[0];
+    // if(typeof require !== 'undefined') XLSX = require('xlsx');
+    var workbook = XLSX.readFile(fileName);
+    var result = {};
+    //workbook.SheetNames.forEach(function(sheetName) {
+    var roa = XLSX.utils.sheet_to_json(workbook.Sheets['Listing'], {header:1});
+    if(roa.length) {
+      result['Listing'] = roa;
+    }
+    //});
+    Team.list = [];
+    teamList.innerHTML = "";
+    for(var i = 5; i < result.Listing.length; i++) {
+      var line = result.Listing[i];
+      //console.log(line[2] != undefined);
+      if(line[2] != undefined && line[3] != undefined && line[5] != undefined) {
+        new Team(i-4, line[2], line[3], line[5], line[4], line[6], false);
+        addTeamToList(i-4, line[2], line[3], line[5], line[4], line[6], false);
+      }
+    }
     // fs.readFile(fileName, 'utf-8', (err, data) => {
     //     if(err){
     //         alert("An error ocurred reading the file :" + err.message);
     //         return;
     //     }
-    //     var obj = JSON.parse(data);
-    //     Team.list = [];
-    //     teamList.innerHTML = "";
-    //     for(var i = 0; i < obj.teams.length; i++) {
-    //       var t = obj.teams[i];
-    //       new Team(t.id, t.name, t.player1, t.player2, t.present);
-    //       addTeamToList(t.id, t.name, t.player1, t.player2, t.present);
-    //     }
+    //     // var obj = JSON.parse(data);
+    //     // Team.list = [];
+    //     // teamList.innerHTML = "";
+    //     // for(var i = 0; i < obj.teams.length; i++) {
+    //     //   var t = obj.teams[i];
+    //     //   new Team(t.id, t.name, t.player1, t.player2, t.present);
+    //     //   addTeamToList(t.id, t.name, t.player1, t.player2, t.present);
+    //     // }
     // });
 
   });
@@ -1508,6 +1596,20 @@ enableAnimations = function() {
 disableAnimations = function() {
   ipcRenderer.send('disableAnimations');
   sendMessage("Animations disabled");
+}
+
+losersCanPlay = function() {
+  gameMaker.loserCanPlay = true;
+  document.getElementById("losersCanPlayBtn").className = "btn hidden";
+  document.getElementById("losersCantPlayBtn").className = "btn";
+  sendMessage("Losers can play again");
+}
+
+losersCantPlay = function() {
+  gameMaker.loserCanPlay = false;
+  document.getElementById("losersCanPlayBtn").className = "btn";
+  document.getElementById("losersCantPlayBtn").className = "btn hidden";
+  sendMessage("Losers can't play again, this can provoke errors in the app");
 }
 
 // toggleLateTeams = function() {

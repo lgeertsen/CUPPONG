@@ -227,6 +227,36 @@ var Renderer = function() {
             }
             setTimeout(function(){
               tableTitle.className = "tableTitle hideBox";
+              var g = game.game;
+              var p = true;
+              if(g % 2 == 1) {
+                g--;
+                p = false;
+              }
+              var gameId = g/2;
+              var gameRound = game.round - 1;
+
+              var id = "game" + gameRound + gameId;
+              var newTable = document.getElementById(id);
+              var newT1 = newTable.querySelector(".team1name");
+              var newT2 = newTable.querySelector(".team2name");
+              if(p) {
+                if(game.winner == 1) {
+                  newT1.innerHTML = game.team1;
+                  newT1.className = "team1name animated jackInTheBox";
+                } else {
+                  newT1.innerHTML = game.team2;
+                  newT1.className = "team1name animated jackInTheBox";
+                }
+              } else {
+                if(game.winner == 1) {
+                  newT2.innerHTML = game.team1;
+                  newT2.className = "team2name animated jackInTheBox";
+                } else {
+                  newT2.innerHTML = game.team2;
+                  newT2.className = "team2name animated jackInTheBox";
+                }
+              }
               endBusy(true);
             }, 500);
           }, 500);
@@ -398,7 +428,6 @@ var Renderer = function() {
     } else {
       next.className = "nextMatch";
       nextTeams.innerHTML = game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
-      console.log(game.nextMatch2 != null && game.nextMatch2.round > 3);
       if(game.nextMatch2 != null && game.nextMatch2.round > 3) {
         nextTeams.innerHTML += "<br>" + game.nextMatch2.team1.name + " VS " + game.nextMatch2.team2.name;
       }

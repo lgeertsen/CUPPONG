@@ -9,7 +9,10 @@
   },
   "build": {
     "appId": "com.cuppong.game",
-    "productName": "Cup Pong"
+    "productName": "Cup Pong",
+    "extraFiles": [
+      "cupPongTeams.xlsx"
+    ]
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -24,5 +27,8 @@
   "devDependencies": {
     "electron": "~1.6.2",
     "electron-builder": "^19.34.1"
+  },
+  "dependencies": {
+    "xlsx": "^0.11.11"
   }
 }

@@ -25,11 +25,21 @@
         </div>
 
         <div id="options" class="tabcontent">
-          <button class="btn btn-warning" onclick="skipAnimations()">Skip animations</button>
-          <button class="btn btn-success" onclick="enableAnimations()">Enable animations</button>
-          <button class="btn btn-danger" onclick="disableAnimations()">Disable animations</button>
-          <button id="showBracketBtn" class="btn btn-success" type="button" name="button" onclick="showBracket()">Show bracket</button>
-          <button id="hideBracketBtn" class="btn btn-danger" type="button" name="button" onclick="hideBracket()">Hide Bracket</button>
+          <div class="">
+            <h2>Animations:</h2>
+            <div class="buttonDiv">
+              <button class="btn orange" onclick="skipAnimations()">Skip animations</button>
+              <button class="btn green" onclick="enableAnimations()">Enable animations</button>
+              <button class="btn red" onclick="disableAnimations()">Disable animations</button>
+            </div>
+          </div>
+          <div class="">
+            <h2>Bracket:</h2>
+            <div class="buttonDiv">
+              <button id="showBracketBtn" class="btn green" type="button" name="button" onclick="showBracket()">Show bracket</button>
+              <button id="hideBracketBtn" class="btn red" type="button" name="button" onclick="hideBracket()">Hide Bracket</button>
+            </div>
+          </div>
         </div>
 
         <div id="lateTeams" class="tabcontent">
@@ -108,10 +118,15 @@
           </div>
           <div id="sidebar" class="col-sm-4">
             <button id="saveTeams" class="btn" type="button" name="button" onclick="saveTeamsToFile()">Save teams</button>
+            <button id="saveTeams" class="btn" type="button" name="button" onclick="saveTeamsToExcel()">Save teams excel</button>
             <button id="loadTeams" class="btn" type="button" name="button" onclick="loadTeamsFromFile()">Load teams</button>
-            <!-- <button id="loadTeamsExcel" class="btn" type="button" name="button" onclick="loadTeamsFromExcel()">Load teams excel</button> -->
+            <button id="loadTeamsExcel" class="btn" type="button" name="button" onclick="loadTeamsFromExcel()">Load teams excel</button>
             <h3>Number of tables</h3>
             <input id="nbTables" class="form-control" type="number" name="nbTables" value="1" min="1">
+
+            <button id="losersCanPlayBtn" class="btn hidden" onclick="losersCanPlay()">Losers can play</button>
+            <button id="losersCantPlayBtn" class="btn" onclick="losersCantPlay()">Losers can't play</button>
+
             <button id="startBtn" class="btn" type="button" name="matchMakingBtn" onclick="startGame()">Start</button>
           </div>
         </div>
