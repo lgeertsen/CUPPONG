@@ -757,7 +757,7 @@ var GameMaking = function() {
     box.setAttribute("tableId", id);
 
     var span = document.createElement("span");
-    span.innerHTML = "Voulez vous enlever la table après la partie?";
+    span.innerHTML = "Voulez vous enlever table " + id + " après la partie?";
     box.appendChild(span);
 
     var b1 = document.createElement("button");
@@ -935,6 +935,9 @@ var GameMaking = function() {
 
   this.addToHistory = function(game, winner) {
     var li = document.createElement("li");
+    var historyId = historyDiv.childNodes.length + 1;
+    li.setAttribute("historyId", historyId);
+    li.id = "history" + historyId;
 
     var roundDiv = document.createElement("div");
     var round = document.createElement("h4");
@@ -982,14 +985,72 @@ var GameMaking = function() {
     var correctBtn = document.createElement("button");
     correctBtn.className = "btn red";
     correctBtn.innerHTML = "Change winner";
-    correctBtn.onclick = function() {
-      console.log("correct");
-    }
+    correctBtn.onclick = function() {gameMaker.correctScore(this)};
     btnDiv.appendChild(correctBtn);
     li.appendChild(btnDiv);
 
     //historyDiv.appendChild(li);
     historyDiv.insertBefore(li, historyDiv.childNodes[0]);
+  }
+
+  this.correctScore = function(e) {
+    var li = e.parentNode.parentNode;
+    var id = li.getAttribute("historyId");
+    var box = document.createElement("div");
+    box.className = "message hidden";
+    box.setAttribute("historyId", id);
+
+    var span = document.createElement("span");
+    span.innerHTML = "Voulez vous corriger le score?";
+    box.appendChild(span);
+
+    var b1 = document.createElement("button");
+    b1.className = "btn";
+    b1.innerHTML = "OUI"
+    b1.onclick = function() {gameMaker.confirmCorrectScore(this)};
+    box.appendChild(b1);
+
+    var b2 = document.createElement("button");
+    b2.className = "btn";
+    b2.innerHTML = "NON";
+    b2.onclick = function() {gameMaker.dontCorrectScore(this)};
+    box.appendChild(b2);
+
+    messageBox.appendChild(box);
+    box.className = "message animated fadeIn";
+    // table.setAttribute("delete", "true");
+  }
+
+  this.confirmCorrectScore = function(e) {
+    var box = e.parentNode;
+    var id = "history" + box.getAttribute("historyId");
+
+    var li = document.getElementById(id);
+    var team1 = li.querySelector(".team1name h4");
+    var team2 = li.querySelector(".team2name h4");
+
+    if(team1.className == "winner") {
+      team1.className = "loser";
+      team2.className = "winner";
+    } else {
+      team1.className = "winner";
+      team2.className = "loser";
+    }
+
+    //var box = e.parentNode;
+    //var id = "table" + box.getAttribute("tableId");
+    box.className = "message animated fadeOut";
+    setTimeout(function() {
+      box.parentNode.removeChild(box);
+    }, 1000);
+  }
+
+  this.dontCorrectScore = function(e) {
+    var box = e.parentNode;
+    box.className = "message animated fadeOut";
+    setTimeout(function() {
+      box.parentNode.removeChild(box);
+    }, 1000);
   }
 };
 let gameMaker = new GameMaking();
