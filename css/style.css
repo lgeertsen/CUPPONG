@@ -589,9 +589,19 @@ div.tab button.active {
 }
 
 .cupTable .close {
+  float: none;
   position: absolute;
   top: 25px;
   right: 20px;
+}
+
+.cupTable .report {
+  position: absolute;
+  top: 25px;
+  left: 20px;
+  width: 30px;
+  padding-top: 3px;
+  font-size: 18px;
 }
 
 .cupTable .tableTitle {

@@ -146,6 +146,14 @@ if (secondWindow != null) {
   ipcMain.on('disableAnimations', (event) => {
     secondWindow.webContents.send('disableAnimations')
   })
+
+  ipcMain.on('correctScore', (event, game) => {
+    secondWindow.webContents.send('correctScore', game)
+  })
+
+  ipcMain.on('loadSave', (event, data) => {
+    secondWindow.webContents.send('loadSave', data)
+  })
 }
 
   // Emitted when the window is closed.

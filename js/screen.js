@@ -423,13 +423,23 @@ var Renderer = function() {
     var nextTeams = table.querySelector(".nextTeams");
     team1.innerHTML = game.team1;
     team2.innerHTML = game.team2;
+    nextTeams.innerHTML = "";
     if(game.nextMatch == null || game.nextMatch.round < 4) {
       next.className = "nextMatch hidden";
     } else {
       next.className = "nextMatch";
-      nextTeams.innerHTML = game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
+      var next1 = document.createElement('span');
+      next1.className = "next1";
+      next1.innerHTML = game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
+      nextTeams.appendChild(next1);
+      var next2 = document.createElement('span');
       if(game.nextMatch2 != null && game.nextMatch2.round > 3) {
-        nextTeams.innerHTML += "<br>" + game.nextMatch2.team1.name + " VS " + game.nextMatch2.team2.name;
+        next2.className = "next2";
+        next2.innerHTML += "<br>" + game.nextMatch2.team1.name + " VS " + game.nextMatch2.team2.name;
+        nextTeams.appendChild(next2);
+      } else {
+        next2.innerHTML = "";
+        nextTeams.appendChild(next2);
       }
     }
 
@@ -456,6 +466,25 @@ var Renderer = function() {
       } else {
         round.className = "row roundDiv";
       }
+    }
+  }
+
+  this.correctTable = function(game) {
+    if(game.status == "playing") {
+      game.tableId = game.table.id;
+      game.team1 = game.team1.name;
+      game.team2 = game.team2.name;
+      this.updateTable(game);
+    } else if(game.status == "nextMatch") {
+      var tableId = "table" + game.table.id;
+      var table = document.getElementById(tableId);
+      var next = table.querySelector(".next1");
+      next.innerHTML = game.team1.name + " VS " + game.team2.name;
+    } else if(game.status == "nextMatch2") {
+      var tableId = "table" + game.table.id;
+      var table = document.getElementById(tableId);
+      var next = table.querySelector(".next2");
+      next.innerHTML = '<br>' + game.team1.name + " VS " + game.team2.name;
     }
   }
 
@@ -486,6 +515,106 @@ var Renderer = function() {
         }, 500);
       }, 750);
     }, 750);
+  }
+
+  this.correctBracketTable = function(game) {
+    var id = "game" + game.round + game.game;
+    var table = document.getElementById(id);
+    var team1 = table.querySelector(".team1name");
+    var team2 = table.querySelector(".team2name");
+    if(game.status == "finished") {
+      if(team1.className == "team1name animated flip winner" ||team1.className == "team1name winner") {
+        team1.className = "team1name loser";
+        team2.className = "team2name winner";
+      } else {
+        team1.className = "team1name winner";
+        team2.className = "team2name loser";
+      }
+    } else {
+      if(game.team1) {
+        team1.innerHTML = game.team1.name;
+      }
+      if(game.team2) {
+        team2.innerHTML = game.team2.name;
+      }
+    }
+  }
+
+  this.loadSave = function(data) {
+    for(var i = data.length-1; i >= 0; i--) {
+      for(var k = 0; k < data[i].length; k++) {
+        var game = data[i][k];
+        if(game.table) {
+          game.tableId = game.table.id;
+        }
+        if(game.team1) {
+          game.team1 = game.team1.name;
+        }
+        if(game.team2) {
+          game.team2 = game.team2.name;
+        }
+        if(game.round < 4) {
+          if(game.status == "finished" || game.status == "playing") {
+            if(bracketShown) {
+              if(busy) {
+                waitingFunctionList.push({
+                  id: 1,
+                  function: updateBracketTable,
+                  data: game
+                });
+              } else {
+                renderer.updateBracketTable(game);
+              }
+            } else {
+              bracketWaitingList.push(game);
+            }
+            var tableId = "table" + game.tableId;
+            var obj = document.getElementById(tableId);
+            if(obj) {
+              var parent = obj.parentNode;
+              parent.removeChild(obj);
+              for(var j = 0; j < roundContainer.querySelectorAll(".roundDiv").length; j++) {
+                var id = "round" + j;
+                var round = document.getElementById(id);
+                if(round.childNodes.length < 2) {
+                  round.className = "row roundDiv hidden";
+                } else {
+                  round.className = "row roundDiv";
+                }
+              }
+            }
+          } else if(game.status == "empty") {
+            var id = "game" + game.round + game.game;
+            var table = document.getElementById(id);
+            var team1 = table.querySelector(".team1name");
+            var team2 = table.querySelector(".team2name");
+            if(game.team1) {
+              team1.innerHTML = game.team1;
+              team1.className = "team1name animated fadeIn";
+            }
+            if(game.team2) {
+              team2.innerHTML = game.team2;
+              team2.className = "team2name animated fadeIn";
+            }
+          }
+
+        } else {
+          if(game.status == "playing") {
+            if(animations) {
+              if(busy) {
+                waitingFunctionList.push({
+                  function: startGame,
+                  data: game
+                });
+              } else {
+                startGame(game);
+              }
+            }
+            renderer.updateTable(game);
+          }
+        }
+      }
+    }
   }
 
   this.createWaitinglist = function(games) {
@@ -543,9 +672,7 @@ ipcRenderer.on('createTables', (event, data) => {
 });
 
 ipcRenderer.on('startGames', (event, data) => {
-  // for(var i = 0; i < data.length; i++) {
-  //   console.log(data[i].round);
-  // }
+
   overview.className = "animated fadeIn";
   setTimeout(function() {
     splashScreen.className = "hidden";
@@ -765,6 +892,23 @@ ipcRenderer.on('disableAnimations', (event) => {
       i++;
     }
   }
+});
+
+ipcRenderer.on('correctScore', (event, game) => {
+  if(game.round > 3) {
+    renderer.correctTable(game);
+  } else {
+    renderer.correctBracketTable(game);
+  }
+});
+
+ipcRenderer.on('loadSave', (event, data) => {
+  overview.className = "animated fadeIn";
+  setTimeout(function() {
+    splashScreen.className = "hidden";
+  }, 1500);
+
+  renderer.loadSave(data);
 });
 
 function startGame(game) {

@@ -46,6 +46,8 @@ var priceProbInput = document.getElementById("priceProb");
 
 var messageBox = document.getElementById("messageBox");
 
+var savePath;
+
 var Team = function(id, name, p1, p2, p1L, p2L, present) {
   this.id = id;
   this.name = name;
@@ -79,7 +81,10 @@ var Game = function() {
   this.team2;
   this.round;
   this.game;
+  this.status = "empty";
   this.finished = false;
+  this.nextMatch = null;
+  this.nextMatch2 = null;
 
   return this;
 }
@@ -187,9 +192,13 @@ var GameMaking = function() {
 
     this.shuffle();
     this.teams = this.teamsList.length;
-    this.games = 1;
-    while(this.games < this.teams-1) {
-      this.games *= 2;
+    if(this.loserCanPlay) {
+      this.games = 1;
+      while(this.games < this.teams-1) {
+        this.games *= 2;
+      }
+    } else {
+      this.games = this.teamsList.length;
     }
     this.games--;
     // this.games = this.teams-1;
@@ -212,6 +221,7 @@ var GameMaking = function() {
 
   this.startGames = function() {
     this.assignTeamsToGame();
+    var nextgames = true;
     var games = [];
     var gameList = [];
     for(var i in this.tables) {
@@ -221,16 +231,23 @@ var GameMaking = function() {
     }
     for(var i in this.tables) {
       var game = this.nextGame(this.tables[i]);
-      games[i].nextMatch = game;
-      gameList[i].nextMatch = game;
+      if(game) {
+        game.status = "nextMatch";
+        games[i].nextMatch = game;
+        gameList[i].nextMatch = game;
+      }
     }
     for(var i in this.tables) {
-      var game = this.nextGame(this.tables[i]);
-      games[i].nextMatch2 = game;
-      gameList[i].nextMatch2 = game;
+      if(game) {
+        var game = this.nextGame(this.tables[i]);
+        game.status = "nextMatch2";
+        games[i].nextMatch2 = game;
+        gameList[i].nextMatch2 = game;
+      }
       this.updateTable(gameList[i]);
     }
 
+    this.saveTournament();
     ipcRenderer.send('startGames', games);
   }
 
@@ -239,6 +256,7 @@ var GameMaking = function() {
       var game = this.waitingList.shift();
       game.table = table;
       game.started = true;
+      game.status = "playing";
       this.updateTable(game);
     // }
     return game;
@@ -270,6 +288,7 @@ var GameMaking = function() {
         game.team2 = this.teamsList.shift();
         game.team2.round = this.round;
         game.complete = true;
+        game.status = "waiting";
         this.waitingList.push(game);
       } else {
         this.roundGame++;
@@ -296,6 +315,7 @@ var GameMaking = function() {
       } else if(game.team2 == undefined) {
         game.team2 = team;
         game.complete = true;
+        game.status = "waiting";
         this.waitingList.push(game);
         // this.addToWaitingList(game.team1, game.team2);
         assigned = true;
@@ -318,6 +338,7 @@ var GameMaking = function() {
       game.game = id;
       game.team1 = team;
       if(game.team2 != undefined) {
+        game.status = "waiting";
         this.waitingList.push(game);
         // this.addToWaitingList(game.team1, game.team2);
       }
@@ -325,6 +346,7 @@ var GameMaking = function() {
       game.team2 = team;
       game.complete = true;
       if(game.team1 != undefined) {
+        game.status = "waiting";
         this.waitingList.push(game);
         // this.addToWaitingList(game.team1, game.team2);
       }
@@ -348,6 +370,7 @@ var GameMaking = function() {
           game.team2.round = this.totalRounds-1;
           game.team2.round = 1;
           game.complete = true;
+          game.status = "waiting";
           this.waitingList.push(game);
           joined = true;
           if(i== this.gameTree[this.totalRounds-1].length-1) {
@@ -367,6 +390,7 @@ var GameMaking = function() {
             game.team2.round = this.totalRounds-1;
             game.team2.round = 1;
             game.complete = true;
+            game.status = "waiting";
             this.waitingList.push(game);
             joined = true;
             if(i == this.gameTree[this.totalRounds-1].length-1) {
@@ -392,6 +416,7 @@ var GameMaking = function() {
     if(winner) {
       winner.checked = false;
       var game = this.gameTree[button.getAttribute("round")][button.getAttribute("game")];
+      game.status = "finished";
       if (game.round == 0) {
         var data = {};
         var champs = document.getElementById("champions");
@@ -459,13 +484,23 @@ var GameMaking = function() {
         }
         var tableId = "table" + game.table.id;
         var table = document.getElementById(tableId);
-        if(table.getAttribute("delete") == "true" || this.waitingList.length == 0) {
+        if(table.getAttribute("delete") == "true" || (this.waitingList.length == 0 && game.nextMatch == null)) {
           this.tables[game.table.id-1].inUse = false;
           var parent = table.parentNode;
           // this.tables.splice(game.table.id-1, 1);
           // for(var i = 0; i < this.tables.length; i++) {
           //   this.tables[i].id = i+1;
           // }
+
+          if(game.nextMatch != null) {
+            game.nextMatch.status = "waiting";
+            this.waitingList.push(game.nextMatch);
+            if(game.nextMatch2 != null) {
+              game.nextMatch2.status = "waiting";
+              this.waitingList.push(game.nextMatch2);
+            }
+          }
+
           parent.removeChild(table);
           var data = {
             tableId: game.table.id,
@@ -480,14 +515,23 @@ var GameMaking = function() {
           var g;
           if(game.nextMatch != null) {
             g = game.nextMatch;
+            g.status = "playing"
 
             if(game.nextMatch2 != null) {
               g.nextMatch = game.nextMatch2;
+              g.nextMatch.status = "nextMatch";
               g.nextMatch2 = this.nextGame(g.table);
+              if(g.nextMatch2 != null) {
+                g.nextMatch2.status = "nextMatch2";
+              }
             } else if(g.round > 3) {
               g.nextMatch = this.nextGame(g.table);
               if(g.nextMatch != null) {
+                g.nextMatch.status = "nextMatch";
                 g.nextMatch2 = this.nextGame(g.table);
+                if(g.nextMatch2 != null) {
+                  g.nextMatch2.status = "nextMatch2";
+                }
               }
             } else {
               g.nextMatch = null;
@@ -495,6 +539,7 @@ var GameMaking = function() {
             if(g.nextMatch != null) {
               //this.removeFromWaitinglist();
             }
+            this.gameTree[g.round][g.game] = g;
             this.updateTable(g);
           } else {
             g = this.startGame(game.table);
@@ -527,6 +572,7 @@ var GameMaking = function() {
         }
       }
     }
+    this.saveTournament();
   }
 
   this.shuffle = function() {
@@ -546,7 +592,11 @@ var GameMaking = function() {
     var count = 0;
     this.gameTree[0] = [];
     for(var i = 0; i < this.games; i++) {
-      this.gameTree[level-1][count] = new Game();
+      var game = new Game();
+      game.round = level-1;
+      game.game = count;
+      this.gameTree[level-1][count] = game;
+
       count++;
       if(count == max && i != this.games-1) {
         level++;
@@ -557,6 +607,7 @@ var GameMaking = function() {
     }
     this.totalRounds = level;
     this.roundLength = this.gameTree[this.totalRounds-1].length;
+    console.log(this.gameTree);
   }
 
   this.createRounds = function() {
@@ -594,6 +645,15 @@ var GameMaking = function() {
     cupTable.id = tableId;
     cupTable.setAttribute("round", -1);
     cupTable.setAttribute("tableId", nb);
+
+    // var reportDiv = document.createElement("div");
+    // reportDiv.className = "close report";
+    // var report = document.createElement("i");
+    // report.className = "fa fa-forward";
+    // report.setAttribute("aria-hidden", "true");
+    // report.onclick = function() {gameMaker.reportGame(this)};
+    // reportDiv.appendChild(report);
+    // cupTable.appendChild(reportDiv);
 
     var closeDiv = document.createElement("div");
     closeDiv.className = "close";
@@ -692,7 +752,6 @@ var GameMaking = function() {
 
     var next = document.createElement("div");
     next.className = "nextMatch";
-    next.innerHTML = "Next: Team1 VS Team2";
     tableTeams.appendChild(next);
 
     cupTable.appendChild(tableTeams);
@@ -708,13 +767,26 @@ var GameMaking = function() {
     t2.innerHTML = game.team2.name;
 
     var next = table.querySelector(".nextMatch");
+    next.innerHTML = "";
     if(game.nextMatch != undefined || game.nextMatch != null) {
       if(game.nextMatch.round > 3) {
         next.className = "nextMatch";
-        next.innerHTML = "Next: " + game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
+        var n = document.createElement('span');
+        n.innerHTML = "Next: "
+        next.appendChild(n);
+        var next1 = document.createElement('span');
+        next1.className = "next1";
+        next1.innerHTML = game.nextMatch.team1.name + " VS " + game.nextMatch.team2.name;
+        next.appendChild(next1);
       }
+      var next2 = document.createElement('span');
       if(game.nextMatch2 != undefined || game.nextMatch2 != null) {
-        next.innerHTML += "<br>" + game.nextMatch2.team1.name + " VS " + game.nextMatch2.team2.name;
+        next2.className = "next2";
+        next2.innerHTML += "<br>" + game.nextMatch2.team1.name + " VS " + game.nextMatch2.team2.name;
+        next.appendChild(next2);
+      } else {
+        next2.innerHTML = "";
+        next.appendChild(next2);
       }
     } else {
       next.className = "nextMatch hidden";
@@ -789,6 +861,100 @@ var GameMaking = function() {
   }
 
   this.dontDeleteTable = function(e) {
+    var box = e.parentNode;
+    box.className = "message animated fadeOut";
+    setTimeout(function() {
+      box.parentNode.removeChild(box);
+    }, 1000);
+  }
+
+  this.reportGame = function(e) {
+    var table = e.parentNode.parentNode;
+    var id = table.getAttribute("tableId");
+    var button = table.querySelector(".teamWinBtn");
+
+    var round = button.getAttribute("round");
+    var game = button.getAttribute("game");
+
+    var box = document.createElement("div");
+    box.className = "message hidden";
+    box.setAttribute("round", round);
+    box.setAttribute("game", game);
+
+    var span = document.createElement("span");
+    span.innerHTML = "Voulez vous reporter le match de table " + id + "?";
+    box.appendChild(span);
+
+    var b1 = document.createElement("button");
+    b1.className = "btn";
+    b1.innerHTML = "OUI"
+    b1.onclick = function() {gameMaker.confirmReportMatch(this)};
+    box.appendChild(b1);
+
+    var b2 = document.createElement("button");
+    b2.className = "btn";
+    b2.innerHTML = "NON";
+    b2.onclick = function() {gameMaker.dontReportMatch(this)};
+    box.appendChild(b2);
+
+    messageBox.appendChild(box);
+    box.className = "message animated fadeIn";
+    // table.setAttribute("delete", "true");
+  }
+
+  this.confirmReportMatch = function(e) {
+    var box = e.parentNode;
+    var r = box.getAttribute("round");
+    var g = box.getAttribute("game");
+
+    var game = this.gameTree[r][g];
+
+    if(this.waitingList.length || game.nextMatch != null) {
+      game.status = "waiting";
+      this.waitingList.push(game);
+
+      var g;
+      if(game.nextMatch != null) {
+        g = game.nextMatch;
+        g.status = "playing"
+
+        if(game.nextMatch2 != null) {
+          g.nextMatch = game.nextMatch2;
+          g.nextMatch.status = "nextMatch";
+          g.nextMatch2 = this.nextGame(g.table);
+          if(g.nextMatch2 != null) {
+            g.nextMatch2.status = "nextMatch2";
+          }
+        } else if(g.round > 3) {
+          g.nextMatch = this.nextGame(g.table);
+          if(g.nextMatch != null) {
+            g.nextMatch.status = "nextMatch";
+            g.nextMatch2 = this.nextGame(g.table);
+            if(g.nextMatch2 != null) {
+              g.nextMatch2.status = "nextMatch2";
+            }
+          }
+        } else {
+          g.nextMatch = null;
+        }
+        if(g.nextMatch != null) {
+          //this.removeFromWaitinglist();
+        }
+        this.updateTable(g);
+      } else {
+        g = this.startGame(game.table);
+        //this.removeFromWaitinglist();
+      }
+    }
+
+
+    box.className = "message animated fadeOut";
+    setTimeout(function() {
+      box.parentNode.removeChild(box);
+    }, 1000);
+  }
+
+  this.dontReportMatch = function(e) {
     var box = e.parentNode;
     box.className = "message animated fadeOut";
     setTimeout(function() {
@@ -937,6 +1103,7 @@ var GameMaking = function() {
     var li = document.createElement("li");
     var historyId = historyDiv.childNodes.length + 1;
     li.setAttribute("historyId", historyId);
+    li.setAttribute("round", game.round);
     li.id = "history" + historyId;
 
     var roundDiv = document.createElement("div");
@@ -954,6 +1121,7 @@ var GameMaking = function() {
     team1Div.className = "team1name";
     var team1name = document.createElement("h4");
     team1name.innerHTML = game.team1.name;
+    team1name.setAttribute("teamId", game.team1.id);
     if(winner == 1) {
       team1name.className = "winner";
     } else {
@@ -973,6 +1141,7 @@ var GameMaking = function() {
     team2Div.className = "team2name";
     var team2name = document.createElement("h4");
     team2name.innerHTML = game.team2.name;
+    team2name.setAttribute("teamId", game.team2.id);
     if(winner == 2) {
       team2name.className = "winner";
     } else {
@@ -1029,12 +1198,73 @@ var GameMaking = function() {
     var team1 = li.querySelector(".team1name h4");
     var team2 = li.querySelector(".team2name h4");
 
+    var winnerId;
+    var loserId;
+
     if(team1.className == "winner") {
+      loserId = team1.getAttribute("teamId");
+      winnerId = team2.getAttribute("teamId");
+
       team1.className = "loser";
       team2.className = "winner";
     } else {
+      winnerId = team1.getAttribute("teamId");
+      loserId = team2.getAttribute("teamId");
+
       team1.className = "winner";
       team2.className = "loser";
+    }
+
+    var winnerTeam = Team.list[winnerId];
+    var loserTeam = Team.list[loserId];
+
+    for(var i in this.gameTree) {
+      var round = this.gameTree[i];
+      for(var j in round) {
+        var game = round[j];
+        var changed = false;
+        // if(game.status != "finished" || game.round < 4) {
+        if(true) {
+          if(game.team1 && game.team1.id == loserId) {
+            game.team1 = winnerTeam;
+            changed = true;
+            if(game.team2 && game.team2.id == winnerId) {
+              game.team2 = loserTeam;
+            }
+          } else if(game.team2 && game.team2.id == loserId) {
+            game.team2 = winnerTeam;
+            changed = true;
+            if(game.team1 && game.team1.id == winnerId) {
+              game.team1 = loserTeam;
+            }
+          } else if(game.team1 && game.team1.id == winnerId) {
+            game.team1 = loserTeam;
+            changed = true;
+          } else if(game.team2 && game.team2.id == winnerId) {
+            game.team2 = loserTeam;
+            changed = true;
+          }
+
+          if(changed) {
+            if(game.round < 4 || game.status == "nextMatch" || game.status == "nextMatch2" || game.status == "playing") {
+              ipcRenderer.send('correctScore', game);
+              if(game.status == "playing") {
+                this.updateTable(game);
+              } else if(game.status == "nextMatch") {
+                var tableId = "table" + game.table.id;
+                var table = document.getElementById(tableId);
+                var next = table.querySelector(".next1");
+                next.innerHTML = game.team1.name + " VS " + game.team2.name;
+              } else if(game.status == "nextMatch2") {
+                var tableId = "table" + game.table.id;
+                var table = document.getElementById(tableId);
+                var next = table.querySelector(".next2");
+                next.innerHTML = '<br>' + game.team1.name + " VS " + game.team2.name;
+              }
+            }
+          }
+        }
+      }
     }
 
     //var box = e.parentNode;
@@ -1051,6 +1281,17 @@ var GameMaking = function() {
     setTimeout(function() {
       box.parentNode.removeChild(box);
     }, 1000);
+  }
+
+  this.saveTournament = function() {
+    var obj = { teams: Team.list, gameTree: this.gameTree, nbTables: this.nbTables, loserCanPlay: this.loserCanPlay };
+    let content = JSON.stringify(obj);
+    fs.writeFile(savePath, content, (err) => {
+      if (err) {
+        alert("An error ocurred updating the save file" + err.message);
+        return;
+      }
+    });
   }
 };
 let gameMaker = new GameMaking();
@@ -1468,6 +1709,60 @@ savePricesToFile = function() {
   });
 }
 
+loadSave = function() {
+  dialog.showOpenDialog({ filters: [
+     { name: 'Cup Pong Save', extensions: ['cupPongSave'] }
+   ]}, (fileNames) => {
+    // fileNames is an array that contains all the selected
+    if(fileNames === undefined){
+        return;
+    }
+    var fileName = fileNames[0];
+    fs.readFile(fileName, 'utf-8', (err, data) => {
+      if(err){
+        alert("An error ocurred reading the file :" + err.message);
+        return;
+      }
+      savePath = fileName;
+
+      var obj = JSON.parse(data);
+      Team.list = [];
+      gameMaker.gameTree = obj.gameTree;
+      gameMaker.nbTables = obj.nbTables;
+      gameMaker.totalRounds = gameMaker.gameTree.length;
+      gameMaker.loserCanPlay = obj.loserCanPlay;
+      for(var i = 0; i < obj.teams.length; i++) {
+        var t = obj.teams[i];
+        new Team(t.id, t.name, t.player1, t.player2, t.player1Licence, t.player2Licence, t.present);
+      }
+      gameMaker.createRounds();
+      gameMaker.createTables();
+
+      var data = { nbTables: gameMaker.nbTables, nbRounds: gameMaker.totalRounds };
+      ipcRenderer.send('createTables', data);
+
+      // this.showRound();
+      main.className = "hidden";
+      overview.className = "";
+
+      for(var i in gameMaker.gameTree) {
+        var round = gameMaker.gameTree[i];
+        for(var j in round) {
+          var game = round[j];
+          if(game.status == "playing") {
+            gameMaker.updateTable(game);
+          } else if(game.status == "waiting") {
+            gameMaker.waitingList.push(game);
+          }
+        }
+      }
+
+      ipcRenderer.send('loadSave', gameMaker.gameTree);
+
+    });
+  });
+}
+
 loadTeamsFromFile = function() {
   dialog.showOpenDialog({ filters: [
      { name: 'Cup Pong Teams', extensions: ['cupPong'] }
@@ -1555,7 +1850,6 @@ loadTeamsFromExcel = function() {
     teamList.innerHTML = "";
     for(var i = 5; i < result.Listing.length; i++) {
       var line = result.Listing[i];
-      //console.log(line[2] != undefined);
       if(line[2] != undefined && line[3] != undefined && line[5] != undefined) {
         new Team(i-4, line[2], line[3], line[5], line[4], line[6], false);
         addTeamToList(i-4, line[2], line[3], line[5], line[4], line[6], false);
@@ -1680,7 +1974,7 @@ losersCantPlay = function() {
   gameMaker.loserCanPlay = false;
   document.getElementById("losersCanPlayBtn").className = "btn";
   document.getElementById("losersCantPlayBtn").className = "btn hidden";
-  sendMessage("Losers can't play again, this can provoke errors in the app");
+  sendMessage("Losers cannot play again");
 }
 
 // toggleLateTeams = function() {
@@ -1723,15 +2017,30 @@ startGame = function() {
     }
   }
   if(gameMaker.teamsList.length > 1) {
-    if(gameMaker.nbTables > (gameMaker.teamsList / 2)) {
-      var nb = Team.list.length;
-      if(nb % 2 == 1) {
-        nb -= 1;
-      }
-      gameMaker.nbTables = nb/2;
-    }
-    document.getElementById("validateLottery").className = "btn";
-    gameMaker.start();
+    dialog.showSaveDialog({ defaultPath: '/tournamentSave.cupPongSave',
+      filters: [{ name: 'Cup Pong Save', extensions: ['cupPongSave'] }]}, (fileName) => {
+        if (fileName === undefined){
+            return;
+        }
+        savePath = fileName;
+        var obj = { };
+        let content = JSON.stringify(obj);
+        fs.writeFile(fileName, content, (err) => {
+            if(err){
+                alert("An error ocurred creating the save file "+ err.message)
+            }
+            if(gameMaker.nbTables > (gameMaker.teamsList / 2)) {
+              var nb = Team.list.length;
+              if(nb % 2 == 1) {
+                nb -= 1;
+              }
+              gameMaker.nbTables = nb/2;
+            }
+            document.getElementById("validateLottery").className = "btn";
+            gameMaker.start();
+            // alert("The file has been succesfully saved");
+        });
+    });
   } else {
     sendMessage("Il n'y a pas assez d'équipes présents");
   }
