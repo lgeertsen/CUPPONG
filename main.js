@@ -87,8 +87,8 @@ function createWindow () {
   secondWindow.setMenu(null);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
-  secondWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
+  // secondWindow.webContents.openDevTools()
 
 if (secondWindow != null) {
   ipcMain.on('createTables', (event, data) => {
